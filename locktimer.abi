@@ -4,14 +4,64 @@
     "types": [],
     "structs": [
         {
-            "name": "claimmoney",
+            "name": "autosend",
             "base": "",
-            "fields": []
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                }
+            ]
         },
         {
-            "name": "lockmoney",
+            "name": "cancel",
             "base": "",
-            "fields": []
+            "fields": [
+                {
+                    "name": "sender",
+                    "type": "name"
+                },
+                {
+                    "name": "id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "claimmoney",
+            "base": "",
+            "fields": [
+                {
+                    "name": "receiver",
+                    "type": "name"
+                },
+                {
+                    "name": "id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "lock",
+            "base": "",
+            "fields": [
+                {
+                    "name": "sender",
+                    "type": "name"
+                },
+                {
+                    "name": "receiver",
+                    "type": "name"
+                },
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "date",
+                    "type": "uint32"
+                }
+            ]
         },
         {
             "name": "timer",
@@ -34,7 +84,7 @@
                     "type": "asset"
                 },
                 {
-                    "name": "is_filled",
+                    "name": "is_sent",
                     "type": "bool"
                 },
                 {
@@ -50,13 +100,23 @@
     ],
     "actions": [
         {
+            "name": "autosend",
+            "type": "autosend",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "cancel",
+            "type": "cancel",
+            "ricardian_contract": ""
+        },
+        {
             "name": "claimmoney",
             "type": "claimmoney",
             "ricardian_contract": ""
         },
         {
-            "name": "lockmoney",
-            "type": "lockmoney",
+            "name": "lock",
+            "type": "lock",
             "ricardian_contract": ""
         }
     ],
