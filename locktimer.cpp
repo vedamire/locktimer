@@ -39,11 +39,13 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
 
   public:
     using contract::contract;
-    locktimer(name receiver, name code, datastream<const char *> ds) : contract(receiver, code, ds), wage_symbol("SYS", 4), table(_self, _self.value) {}
+    locktimer(name receiver, name code, datastream<const char *> ds) : contract(receiver, code, ds), wage_symbol("EOS", 4), table(_self, _self.value) {}
 
+    // don't know why, but without this eosio::transfer doesn't notifies this contract. https://eosio.stackexchange.com/questions/4480/how-to-debug-eosioon-notifyeosio-tokentransfer-actions
+    // [[eosio::on_notify("eosio.token::transfer")]] void dummytansfer(eosio::name from, eosio::name to, eosio::asset quantity, std::string memo){ontransfer(from,to,quantity,memo);} // This is a hack, otherwise the ontransfer function won't work
 
     [[eosio::on_notify("eosio.token::transfer")]]
-    void listener(const name& sender, const name& to, const eosio::asset& quantity, const std::string& memo)
+    void ontransfer(const name& sender, const name& to, const eosio::asset& quantity, const std::string& memo)
     {
       if (to != get_self() || sender == get_self()) return;
       check(quantity.amount > 0, "When pigs fly");
@@ -59,15 +61,16 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
           row.start_date = NULL;
           row.end_date = NULL;
         });
-      } else if(memo == "replenish") {
+        print("Timer is created with id: ", primary_key);
+      }
+       else {
+        check(memo == "replenish", "Wrong memo. To transfer money here use ether 'createtimer' or 'replenish' memo");
         print("Account is successfully replenished");
-      } else {
-        check(false, "Wrong memo. To transfer money here use ether 'createtimer' or 'replenish' memo");
       }
     }
 
     [[eosio::action]]
-    void lock(const name& sender, const name& receiver, const uint64_t& id, const uint32_t& date) {
+    void lock(const name& sender, const uint64_t& id, const name& receiver, const uint32_t& date) {
       require_auth(sender);
       check(is_account(receiver), "Receiver's account doesn't exist");
       check(now() < date, "The date is already passed");
@@ -95,29 +98,6 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
     }
 
     [[eosio::action]]
-    void autosend(const uint64_t& id) {
-      require_auth(get_self());
-      auto timer = table.find(id);
-      check(timer != table.end(), "There's no wage contract with such an id");
-      check(timer->is_sent == true, "The transaction isn't sent yet");
-      check(timer->end_date - 1 < now(), "Time isn't passed yet");
-      // auto wage = table_wage.find(id);
-      action{
-        permission_level{get_self(), "active"_n},
-        "eosio.token"_n,
-        "transfer"_n,
-        std::make_tuple(get_self(), timer->receiver, timer->quantity, std::string("Locked money are released!"))
-      }.send();
-      table.erase(timer);
-
-
-      // check(wage != table_wage.end(), "There's no wage contract with such an id");
-      // check(wage->is_accepted == true, "The wage contract isn't accepted");
-
-      // cash_out_transaction(wage, table_wage);
-    }
-
-    [[eosio::action]]
     void cancel(const name& sender, const uint64_t& id) {
       require_auth(sender);
       auto timer = table.find(id);
@@ -125,6 +105,17 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
       check(timer->sender == sender, "You are not the owner of this timer");
       check(timer->is_sent == false, "Money are already locked and can't be unlocked until the date");
       table.erase(timer);
+    }
+
+    [[eosio::action]]
+    void autosend(const uint64_t& id) {
+      require_auth(get_self());
+      auto timer = table.find(id);
+      check(timer != table.end(), "There's no wage contract with such an id");
+      check(timer->is_sent == true, "The transaction isn't sent yet");
+      check(timer->end_date - 1 < now(), "Time isn't passed yet");
+
+      release(timer, table);
     }
 
     [[eosio::action]]
@@ -136,6 +127,17 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
       check(timer->receiver == receiver, "You are not the receiver of this timer");
       check(timer->end_date - 1 < now(), "Time isn't passed yet");
 
+      release(timer, table);
+    }
+
+    [[eosio::action]]
+    void ping(const name& name) {
+      require_auth(name);
+      print("Contract is working");
+    }
+
+  private:
+    void release(const timer_index::const_iterator& timer, timer_index& table) {
       action{
         permission_level{get_self(), "active"_n},
         "eosio.token"_n,
@@ -143,11 +145,5 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
         std::make_tuple(get_self(), timer->receiver, timer->quantity, std::string("Locked money are released!"))
       }.send();
       table.erase(timer);
-    }
-
-    [[eosio::action]]
-    void ping(const name& name) {
-      require_auth(name);
-      print("Contract is working");
     }
 };
