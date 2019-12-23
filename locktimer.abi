@@ -64,6 +64,16 @@
             ]
         },
         {
+            "name": "ping",
+            "base": "",
+            "fields": [
+                {
+                    "name": "name",
+                    "type": "name"
+                }
+            ]
+        },
+        {
             "name": "timer",
             "base": "",
             "fields": [
@@ -117,6 +127,11 @@
         {
             "name": "lock",
             "type": "lock",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "ping",
+            "type": "ping",
             "ricardian_contract": ""
         }
     ],

@@ -39,7 +39,7 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
 
   public:
     using contract::contract;
-    locktimer(name receiver, name code, datastream<const char *> ds) : contract(receiver, code, ds), wage_symbol("EOS", 4), table(_self, _self.value) {}
+    locktimer(name receiver, name code, datastream<const char *> ds) : contract(receiver, code, ds), wage_symbol("SYS", 4), table(_self, _self.value) {}
 
 
     [[eosio::on_notify("eosio.token::transfer")]]
@@ -60,7 +60,9 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
           row.end_date = NULL;
         });
       } else if(memo == "replenish") {
-
+        print("Account is successfully replenished");
+      } else {
+        check(false, "Wrong memo. To transfer money here use ether 'createtimer' or 'replenish' memo");
       }
     }
 
@@ -69,6 +71,8 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
       require_auth(sender);
       check(is_account(receiver), "Receiver's account doesn't exist");
       check(now() < date, "The date is already passed");
+      check(date - now() <= 3888000, "Maximum delay supported from now is 45 days");
+
       auto timer = table.find(id);
       check(timer != table.end(), "Timer with this id doesn't exist");
       check(timer->sender == sender, "You are not the owner of this timer");
@@ -139,6 +143,11 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
         std::make_tuple(get_self(), timer->receiver, timer->quantity, std::string("Locked money are released!"))
       }.send();
       table.erase(timer);
+    }
 
+    [[eosio::action]]
+    void ping(const name& name) {
+      require_auth(name);
+      print("Contract is working");
     }
 };
