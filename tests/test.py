@@ -383,30 +383,14 @@ class TestStringMethods(unittest.TestCase):
         for i in range(len(arr)):
             self.assertEqual(arr[i]["id"], i)
             self.assertTrue(arr[i]["is_sent"])
-        # lockConsole()
-        # locktimer.table("timerv1", locktimer);
-        # val = getVal()
-        # str3 ='"id": 3,"sender": "charlie", "receiver": "locktimer", "quantity": "0.0150 EOS", "is_sent": 1'
-        # str4 ='"id": 2,"sender": "charlie", "receiver": "locktimer", "quantity": "0.0150 EOS", "is_sent": 1'
-        # str5 ='"id": 5,"sender": "charlie", "receiver": "locktimer", "quantity": "0.0150 EOS", "is_sent": 1'
-        # str6 ='"id": 1,"sender": "charlie", "receiver": "locktimer", "quantity": "0.0150 EOS", "is_sent": 1'
-        # self.assertTrue(str3 in val)
-        # self.assertTrue(str4 in val)
-        # self.assertTrue(str5 in val)
-        # self.assertTrue(str6 in val)
+
         time.sleep(7);
         lockConsole()
         locktimer.table("timerv1", locktimer);
         js = correct(getVal());
         arr = js["rows"]
         self.assertEqual(len(arr), 0)
-                # for i in range(len(arr)):
-                #     self.assertEqual(arr[i]["id"], i)
-                #     self.assertTrue(arr[i]["is_sent"])
-        # self.assertFalse(str3 in val)
-        # self.assertFalse(str4 in val)
-        # self.assertFalse(str5 in val)
-        # self.assertFalse(str6 in val)
+
 
 if __name__ == '__main__':
     unittest.main()
