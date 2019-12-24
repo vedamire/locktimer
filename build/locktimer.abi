@@ -42,12 +42,12 @@
             ]
         },
         {
-            "name": "deferredtxn",
+            "name": "defertxn",
             "base": "",
             "fields": [
                 {
                     "name": "delay",
-                    "type": "uint64"
+                    "type": "uint32"
                 },
                 {
                     "name": "sendid",
@@ -143,8 +143,8 @@
             "ricardian_contract": ""
         },
         {
-            "name": "deferredtxn",
-            "type": "deferredtxn",
+            "name": "defertxn",
+            "type": "defertxn",
             "ricardian_contract": ""
         },
         {
