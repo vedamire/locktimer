@@ -41,9 +41,6 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
     using contract::contract;
     locktimer(name receiver, name code, datastream<const char *> ds) : contract(receiver, code, ds), wage_symbol("EOS", 4), table(_self, _self.value) {}
 
-    // don't know why, but without this eosio::transfer doesn't notifies this contract. https://eosio.stackexchange.com/questions/4480/how-to-debug-eosioon-notifyeosio-tokentransfer-actions
-    // [[eosio::on_notify("eosio.token::transfer")]] void dummytansfer(eosio::name from, eosio::name to, eosio::asset quantity, std::string memo){ontransfer(from,to,quantity,memo);} // This is a hack, otherwise the ontransfer function won't work
-
     [[eosio::on_notify("eosio.token::transfer")]]
     void ontransfer(const name& sender, const name& to, const eosio::asset& quantity, const std::string& memo)
     {
