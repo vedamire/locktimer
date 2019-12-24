@@ -120,7 +120,7 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
     }
 
     [[eosio::action]]
-    void defertxn(uint32_t delay, uint64_t sendid, uint64_t _id) {
+    void defertxn(const uint32_t& delay, const uint64_t& sendid, const uint64_t& _id) {
         require_auth(get_self());
         eosio::transaction deferred;
         uint32_t max_delay = 3888000; //max delay supported by EOS 3888000
@@ -167,7 +167,7 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
     }
 
   private:
-    void send_recursion(uint32_t delay, uint64_t id) {
+    void send_recursion(const uint32_t& delay, const uint64_t& id) {
       action (
         permission_level(get_self(),"active"_n),
         get_self(),
