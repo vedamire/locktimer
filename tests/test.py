@@ -237,7 +237,6 @@ class TestStringMethods(unittest.TestCase):
         # self.assertFalse('Foo'.isupper())
 
     def test_multiple(self):
-
         token_host.push_action(
             "transfer",
             {
@@ -390,8 +389,188 @@ class TestStringMethods(unittest.TestCase):
         js = correct(getVal());
         arr = js["rows"]
         self.assertEqual(len(arr), 0)
+    def test_cancel_locking(self):
+        token_host.push_action(
+            "transfer",
+            {
+                "from": bob, "to": locktimer,
+                "quantity": "0.0213 EOS", "memo":"createtimer"
+            },
+            bob)
+        for i in range(7):
+            token_host.push_action(
+                "transfer",
+                {
+                    "from": charlie, "to": locktimer,
+                    "quantity": "0.0" + str(i) + "53 EOS", "memo":"createtimer"
+                },
+                charlie)
 
+        lockConsole()
+        locktimer.table("timerv1", locktimer);
+        js = correct(getVal());
+        arr = js["rows"]
+        for i in range(len(arr)):
+            self.assertEqual(arr[i]["id"], i)
+            self.assertFalse(arr[i]["is_sent"])
+        locktimer.push_action (
+            "cancel",
+            {
+                "sender": bob,
+                "id": 0
+            },
+            permission=(bob, Permission.ACTIVE))
+        for i in range(1, 4):
+            locktimer.push_action (
+                "cancel",
+                {
+                    "sender": charlie,
+                    "id": i
+                },
+                permission=(charlie, Permission.ACTIVE))
+        lockConsole()
+        locktimer.table("timerv1", locktimer);
+        js = correct(getVal());
+        arr = js["rows"]
+        for i in range(len(arr)):
+            self.assertNotEqual(arr[i]["id"], i)
+            self.assertFalse(arr[i]["is_sent"])
+        for i in range(4, 8):
+            locktimer.push_action (
+                "lock",
+                {
+                    "sender": charlie,
+                    "id": i,
+                    "receiver": zoro,
+                    "date": now() + int(10)
+                },
+                permission=(charlie, Permission.ACTIVE))
+        lockConsole()
+        locktimer.table("timerv1", locktimer);
+        js = correct(getVal());
+        arr = js["rows"]
+        for i in range(len(arr)):
+            self.assertTrue(arr[i]["is_sent"])
+            self.assertTrue(arr[i]["receiver"] == "zoro")
+        time.sleep(10)
+        lockConsole()
+        locktimer.table("timerv1", locktimer);
+        js = correct(getVal());
+        arr = js["rows"]
+        self.assertTrue(len(arr) == 0);
+        lockConsole()
+        token_host.table("accounts", zoro)
+        js = correct(getVal())["rows"];
+        self.assertFalse('0.0000 EOS' in js[0]["balance"])
 
+    def test_restrictions(self):
+        try:
+            token_host.push_action(
+                "transfer",
+                {
+                    "from": bob, "to": locktimer,
+                    "quantity": "0.0213 EOS", "memo":"createtimer"
+                },
+                bob)
+            locktimer.push_action (
+                "lock",
+                {
+                    "sender": bob,
+                    "id": 3,
+                    "receiver": zoro,
+                    "date": now() + int(10)
+                },
+                permission=(bob, Permission.ACTIVE))
+            self.assertTrue(1 == 0);
+
+        except Error as err:
+            self.assertTrue("assertion failure with message" in format(err))
+        try:
+            locktimer.push_action (
+                "lock",
+                {
+                    "sender": bob,
+                    "id": 3,
+                    "receiver": zoro,
+                    "date": now() + int(10)
+                },
+                permission=(charlie, Permission.ACTIVE))
+            self.assertTrue(1 == 0);
+        except Error as err:
+            # self.assertTrue("assertion failure with message" in format(err))
+            print(Error)
+        try:
+            locktimer.push_action (
+                "lock",
+                {
+                    "sender": bob,
+                    "id": 0,
+                    "receiver": zoro,
+                    "date": now() + int(3888002)
+                },
+                permission=(bob, Permission.ACTIVE))
+            self.assertTrue(1 == 0);
+        except Error as err:
+            self.assertTrue("assertion failure with message" in format(err))
+        try:
+            locktimer.push_action (
+                "lock",
+                {
+                    "sender": bob,
+                    "id": 0,
+                    "receiver": zoro,
+                    "date": now() - int(5)
+                },
+                permission=(bob, Permission.ACTIVE))
+            self.assertTrue(1 == 0);
+        except Error as err:
+            self.assertTrue("assertion failure with message" in format(err))
+            # print(err)
+        try:
+            locktimer.push_action (
+                "lock",
+                {
+                    "sender": bob,
+                    "id": 0,
+                    "receiver": zoro,
+                    "date": now() - int(5)
+                },
+                permission=(bob, Permission.ACTIVE))
+            self.assertTrue(1 == 0);
+        except Error as err:
+            self.assertTrue("assertion failure with message" in format(err))
+            # print(err)
+        locktimer.push_action (
+            "lock",
+            {
+                "sender": bob,
+                "id": 0,
+                "receiver": zoro,
+                "date": now() + int(1000)
+            },
+            permission=(bob, Permission.ACTIVE))
+        try:
+            locktimer.push_action (
+                "claimmoney",
+                {
+                    "receiver": zoro,
+                    "id": 0
+                },
+                permission=(zoro, Permission.ACTIVE))
+            self.assertTrue(1 == 0);
+        except Error as err:
+            self.assertTrue("assertion failure with message" in format(err))
+        try:
+            locktimer.push_action (
+                "cancel",
+                {
+                    "sender": bob,
+                    "id": 0
+                },
+                permission=(bob, Permission.ACTIVE))
+            self.assertTrue(1 == 0);
+        except Error as err:
+            self.assertTrue("assertion failure with message" in format(err))
 if __name__ == '__main__':
     unittest.main()
 
