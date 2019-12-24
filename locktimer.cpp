@@ -86,15 +86,7 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
         row.is_sent = true;
       });
       // Send deferred;
-      eosio::transaction deferred;
-
-      deferred.actions.emplace_back (
-        permission_level{get_self(), "active"_n},
-        get_self(), "autosend"_n,
-        std::make_tuple(id)
-      );
-      deferred.delay_sec = timer->end_date - now();
-      deferred.send(id, get_self());
+      deferredtxn(timer->end_date - now(), id, id);
     }
 
     [[eosio::action]]
@@ -119,6 +111,38 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
     }
 
     [[eosio::action]]
+    void deferredtxn(const uint64_t& delay, const uint64_t& sendid, const uint64_t& _id) {
+        // eosio::transaction txn{};
+        eosio::transaction deferred;
+
+        uint64_t max_delay = 3888000; //max delay supported by EOS 3888000
+
+
+        if (delay <= max_delay){
+          deferred.actions.emplace_back (
+            permission_level{get_self(), "active"_n},
+            get_self(), "autosend"_n,
+            std::make_tuple(_id)
+          );
+          deferred.delay_sec = delay;
+          deferred.send(_id, get_self());
+        //perform your transaction here
+        }
+        else{
+            uint64_t remaining_delay = delay - max_delay;
+            uint64_t newid = updateSenderId(sendid); //sender id should be updated for every recursive call
+            // transaction to update the delay
+            deferred.actions.emplace_back(
+                eosio::permission_level{get_self(), "active"_n},
+                get_self(),
+                "deferredtxn"_n,
+                std::make_tuple(remaining_delay, newid, _id));
+            deferred.delay_sec = max_delay; // here we set the new delay which is maximum until remaining_delay is less the max_delay
+            deferred.send(sendid, get_self());
+        }
+    }
+
+    [[eosio::action]]
     void claimmoney(const name& receiver, const uint64_t& id) {
       require_auth(receiver);
       auto timer = table.find(id);
@@ -137,6 +161,12 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
     }
 
   private:
+    uint64_t updateSenderId(const uint64_t& id) {
+      const uint64_t base = 10000000;
+      if(id < base) return id + base;
+      else return id - base;
+    }
+
     void release(const timer_index::const_iterator& timer, timer_index& table) {
       action{
         permission_level{get_self(), "active"_n},

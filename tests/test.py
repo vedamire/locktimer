@@ -116,120 +116,120 @@ class TestStringMethods(unittest.TestCase):
                 "quantity": "50.0000 EOS", "memo":""
             },
             charlie)
-    def test_single(self):
-        token_host.push_action(
-            "transfer",
-            {
-                "from": charlie, "to": locktimer,
-                "quantity": "0.0750 EOS", "memo":"createtimer"
-            },
-            charlie)
-        lockConsole()
-        locktimer.table("timerv1", locktimer);
-        self.assertTrue("0.0750 EOS" in getVal())
-        locktimer.push_action (
-            "lock",
-            {
-                "sender": charlie,
-                "id": 0,
-                "receiver": bob,
-                "date": now() + int(6)
-            },
-            permission=(charlie, Permission.ACTIVE))
-
-        time.sleep(10);
-        lockConsole();
-        locktimer.table("timerv1", locktimer);
-        self.assertTrue('[]' in getVal());
-
-        lockConsole()
-        token_host.table("accounts", bob)
-        self.assertTrue("0750 EOS" in getVal());
-        token_host.push_action(
-            "transfer",
-            {
-                "from": bob, "to": charlie,
-                "quantity": "0.0750 EOS", "memo":"createtimer"
-            },
-            bob)
-
-    def test_cancel(self):
-
-        token_host.push_action(
-            "transfer",
-            {
-                "from": bob, "to": locktimer,
-                "quantity": "0.0250 EOS", "memo":"createtimer"
-            },
-            bob)
-        token_host.push_action(
-            "transfer",
-            {
-                "from": charlie, "to": locktimer,
-                "quantity": "0.0350 EOS", "memo":"createtimer"
-            },
-            charlie)
-        token_host.push_action(
-            "transfer",
-            {
-                "from": charlie, "to": locktimer,
-                "quantity": "0.0370 EOS", "memo":"createtimer"
-            },
-            charlie)
-        token_host.push_action(
-            "transfer",
-            {
-                "from": charlie, "to": locktimer,
-                "quantity": "0.0320 EOS", "memo":"createtimer"
-            },
-            charlie)
-
-
-        lockConsole()
-        locktimer.table("timerv1", locktimer);
-        self.assertTrue('"id": 0,' in getVal())
-
-        locktimer.push_action (
-            "cancel",
-            {
-                "sender": charlie,
-                "id": 2
-            },
-            permission=(charlie, Permission.ACTIVE))
-
-        locktimer.push_action (
-            "cancel",
-            {
-                "sender": bob,
-                "id": 0
-            },
-            permission=(bob, Permission.ACTIVE))
-        lockConsole()
-        locktimer.table("timerv1", locktimer);
-        val = getVal()
-        self.assertTrue('"id": 3,' in val)
-        self.assertFalse('"id": 2,' in val)
-        self.assertFalse('"id": 0,' in val)
-        self.assertTrue('"id": 1,' in val);
-        locktimer.push_action (
-            "cancel",
-            {
-                "sender": charlie,
-                "id": 3
-            },
-            permission=(charlie, Permission.ACTIVE))
-        locktimer.push_action (
-            "cancel",
-            {
-                "sender": charlie,
-                "id": 1
-            },
-            permission=(charlie, Permission.ACTIVE))
-        lockConsole()
-        locktimer.table("timerv1", locktimer);
-        val = getVal()
-        self.assertFalse('"id": 3,' in val)
-        self.assertFalse('"id": 1,' in val)
+    # def test_single(self):
+    #     token_host.push_action(
+    #         "transfer",
+    #         {
+    #             "from": charlie, "to": locktimer,
+    #             "quantity": "0.0750 EOS", "memo":"createtimer"
+    #         },
+    #         charlie)
+    #     lockConsole()
+    #     locktimer.table("timerv1", locktimer);
+    #     self.assertTrue("0.0750 EOS" in getVal())
+    #     locktimer.push_action (
+    #         "lock",
+    #         {
+    #             "sender": charlie,
+    #             "id": 0,
+    #             "receiver": bob,
+    #             "date": now() + int(6)
+    #         },
+    #         permission=(charlie, Permission.ACTIVE))
+    #
+    #     time.sleep(10);
+    #     lockConsole();
+    #     locktimer.table("timerv1", locktimer);
+    #     self.assertTrue('[]' in getVal());
+    #
+    #     lockConsole()
+    #     token_host.table("accounts", bob)
+    #     self.assertTrue("0750 EOS" in getVal());
+    #     token_host.push_action(
+    #         "transfer",
+    #         {
+    #             "from": bob, "to": charlie,
+    #             "quantity": "0.0750 EOS", "memo":"createtimer"
+    #         },
+    #         bob)
+    #
+    # def test_cancel(self):
+    #
+    #     token_host.push_action(
+    #         "transfer",
+    #         {
+    #             "from": bob, "to": locktimer,
+    #             "quantity": "0.0250 EOS", "memo":"createtimer"
+    #         },
+    #         bob)
+    #     token_host.push_action(
+    #         "transfer",
+    #         {
+    #             "from": charlie, "to": locktimer,
+    #             "quantity": "0.0350 EOS", "memo":"createtimer"
+    #         },
+    #         charlie)
+    #     token_host.push_action(
+    #         "transfer",
+    #         {
+    #             "from": charlie, "to": locktimer,
+    #             "quantity": "0.0370 EOS", "memo":"createtimer"
+    #         },
+    #         charlie)
+    #     token_host.push_action(
+    #         "transfer",
+    #         {
+    #             "from": charlie, "to": locktimer,
+    #             "quantity": "0.0320 EOS", "memo":"createtimer"
+    #         },
+    #         charlie)
+    #
+    #
+    #     lockConsole()
+    #     locktimer.table("timerv1", locktimer);
+    #     self.assertTrue('"id": 0,' in getVal())
+    #
+    #     locktimer.push_action (
+    #         "cancel",
+    #         {
+    #             "sender": charlie,
+    #             "id": 2
+    #         },
+    #         permission=(charlie, Permission.ACTIVE))
+    #
+    #     locktimer.push_action (
+    #         "cancel",
+    #         {
+    #             "sender": bob,
+    #             "id": 0
+    #         },
+    #         permission=(bob, Permission.ACTIVE))
+    #     lockConsole()
+    #     locktimer.table("timerv1", locktimer);
+    #     val = getVal()
+    #     self.assertTrue('"id": 3,' in val)
+    #     self.assertFalse('"id": 2,' in val)
+    #     self.assertFalse('"id": 0,' in val)
+    #     self.assertTrue('"id": 1,' in val);
+    #     locktimer.push_action (
+    #         "cancel",
+    #         {
+    #             "sender": charlie,
+    #             "id": 3
+    #         },
+    #         permission=(charlie, Permission.ACTIVE))
+    #     locktimer.push_action (
+    #         "cancel",
+    #         {
+    #             "sender": charlie,
+    #             "id": 1
+    #         },
+    #         permission=(charlie, Permission.ACTIVE))
+    #     lockConsole()
+    #     locktimer.table("timerv1", locktimer);
+    #     val = getVal()
+    #     self.assertFalse('"id": 3,' in val)
+    #     self.assertFalse('"id": 1,' in val)
 
         # 750
 
@@ -298,6 +298,7 @@ class TestStringMethods(unittest.TestCase):
         locktimer.table("timerv1", locktimer);
         js = correct(getVal());
         # print(js);
+        delay = 4
         arr = js["rows"]
         for i in range(len(arr)):
             self.assertEqual(arr[i]["id"], i)
@@ -309,7 +310,7 @@ class TestStringMethods(unittest.TestCase):
                 "sender": bob,
                 "id": 0,
                 "receiver": charlie,
-                "date": now() + int(6)
+                "date": now() + int(delay)
             },
             permission=(bob, Permission.ACTIVE))
         locktimer.push_action (
@@ -318,7 +319,7 @@ class TestStringMethods(unittest.TestCase):
                 "sender": charlie,
                 "id": 1,
                 "receiver": bob,
-                "date": now() + int(6)
+                "date": now() + int(delay)
             },
             permission=(charlie, Permission.ACTIVE))
         locktimer.push_action (
@@ -327,7 +328,7 @@ class TestStringMethods(unittest.TestCase):
                 "sender": charlie,
                 "id": 2,
                 "receiver": bob,
-                "date": now() + int(6)
+                "date": now() + int(delay)
             },
             permission=(charlie, Permission.ACTIVE))
         locktimer.push_action (
@@ -336,7 +337,7 @@ class TestStringMethods(unittest.TestCase):
                 "sender": charlie,
                 "id": 3,
                 "receiver": bob,
-                "date": now() + int(6)
+                "date": now() + int(delay)
             },
             permission=(charlie, Permission.ACTIVE))
         locktimer.push_action (
@@ -345,7 +346,7 @@ class TestStringMethods(unittest.TestCase):
                 "sender": bob,
                 "id": 4,
                 "receiver": bob,
-                "date": now() + int(6)
+                "date": now() + int(delay)
             },
             permission=(bob, Permission.ACTIVE))
         locktimer.push_action (
@@ -354,7 +355,7 @@ class TestStringMethods(unittest.TestCase):
                 "sender": charlie,
                 "id": 5,
                 "receiver": bob,
-                "date": now() + int(6)
+                "date": now() + int(delay)
             },
             permission=(charlie, Permission.ACTIVE))
         locktimer.push_action (
@@ -363,7 +364,7 @@ class TestStringMethods(unittest.TestCase):
                 "sender": charlie,
                 "id": 6,
                 "receiver": bob,
-                "date": now() + int(6)
+                "date": now() + int(delay)
             },
             permission=(charlie, Permission.ACTIVE))
         locktimer.push_action (
@@ -372,7 +373,7 @@ class TestStringMethods(unittest.TestCase):
                 "sender": charlie,
                 "id": 7,
                 "receiver": bob,
-                "date": now() + int(6)
+                "date": now() + int(delay)
             },
             permission=(charlie, Permission.ACTIVE))
         lockConsole()
@@ -382,8 +383,19 @@ class TestStringMethods(unittest.TestCase):
         for i in range(len(arr)):
             self.assertEqual(arr[i]["id"], i)
             self.assertTrue(arr[i]["is_sent"])
-
-        time.sleep(7);
+        # lockConsole()
+        # locktimer.table("timerv1", locktimer);
+        # js = correct(getVal());
+        # # print(js)
+        lockConsole()
+        token_host.table("accounts", bob);
+        js = correct(getVal());
+        print(js)
+        time.sleep(6);
+        lockConsole()
+        token_host.table("accounts", bob);
+        js = correct(getVal());
+        print(js)
         lockConsole()
         locktimer.table("timerv1", locktimer);
         js = correct(getVal());
