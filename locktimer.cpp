@@ -86,16 +86,7 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
         row.end_date = date;
         row.is_sent = true;
       });
-      // Send deferred;
-      // action(
-      //   permission_level{get_self(),"active"_n},
-      //   get_self(),
-      //   "deferredtxn"_n,
-      //   std::make_tuple(timer->end_date - now(), id, id)
-      // ).send();
-      // uint32_t delay = date - now();
       send_recursion(timer->end_date - now(), id);
-      // defertxn(timer->end_date - now(), id, id);
     }
 
     [[eosio::action]]
