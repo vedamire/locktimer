@@ -10,8 +10,6 @@ using namespace eosio;
 
 typedef std::function<void(const uint64_t*, const name*, const name*)> notify_func;
 
-
-
 class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
   private:
     const symbol wage_symbol;
