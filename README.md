@@ -5,18 +5,18 @@ EOS smart contract that allows you to lock eos for a certain amount of time and 
 ## Build
 
 You need to have eos ctd 1.6.3 installed
-
+```bash
 cd scripts
 bash compile.sh
-
+```
 ## Run tests.
 
 You need to have python 3 and eosfactory installed https://eosfactory.io/build/html/tutorials/01.InstallingEOSFactory.html
-
+```bash
 cd tests
 python3 build.py
 python3 test.py
-
+```
 ## Actions:
 
 * On transfer (ontransfer). Requires: none.
