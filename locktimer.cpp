@@ -12,7 +12,10 @@ typedef std::function<void(const uint64_t*, const name*, const name*)> notify_fu
 
 class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
   private:
+
     const symbol wage_symbol;
+    const asset FEE;
+    const asset MIN;
     struct [[eosio::table]] timer
     {
       uint64_t id;
@@ -37,7 +40,9 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
 
   public:
     using contract::contract;
-    locktimer(name receiver, name code, datastream<const char *> ds) : contract(receiver, code, ds), wage_symbol("EOS", 4), table(_self, _self.value) {}
+    locktimer(name receiver, name code, datastream<const char *> ds) : contract(receiver, code, ds), wage_symbol("EOS", 4),
+    FEE(0.0300, this->wage_symbol), MIN(0.0500, this-> wage_symbol),
+    table(_self, _self.value) {}
 
     [[eosio::on_notify("eosio.token::transfer")]]
     void ontransfer(const name& sender, const name& to, const eosio::asset& quantity, const std::string& memo)
@@ -46,12 +51,13 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
       check(quantity.amount > 0, "When pigs fly");
       check(quantity.symbol == wage_symbol, "These are not the droids you are looking for.");
       if(memo == "createtimer") {
+        check(quantity >= MIN, "Minimum amount of deposit is 0.0500 EOS. Be aware that the fee is 0.0300 EOS");
         uint64_t primary_key = table.available_primary_key();
         table.emplace(get_self(), [&](auto &row) {
           row.id = primary_key;
           row.sender = sender;
           row.receiver = _self;
-          row.quantity = quantity;
+          row.quantity = quantity - FEE;
           row.is_sent = false;
           row.start_date = NULL;
           row.end_date = NULL;

@@ -159,28 +159,28 @@ class TestStringMethods(unittest.TestCase):
             "transfer",
             {
                 "from": bob, "to": locktimer,
-                "quantity": "0.0250 EOS", "memo":"createtimer"
+                "quantity": "0.0650 EOS", "memo":"createtimer"
             },
             bob)
         token_host.push_action(
             "transfer",
             {
                 "from": charlie, "to": locktimer,
-                "quantity": "0.0350 EOS", "memo":"createtimer"
+                "quantity": "0.0750 EOS", "memo":"createtimer"
             },
             charlie)
         token_host.push_action(
             "transfer",
             {
                 "from": charlie, "to": locktimer,
-                "quantity": "0.0370 EOS", "memo":"createtimer"
+                "quantity": "0.0570 EOS", "memo":"createtimer"
             },
             charlie)
         token_host.push_action(
             "transfer",
             {
                 "from": charlie, "to": locktimer,
-                "quantity": "0.0320 EOS", "memo":"createtimer"
+                "quantity": "0.0920 EOS", "memo":"createtimer"
             },
             charlie)
 
@@ -236,56 +236,56 @@ class TestStringMethods(unittest.TestCase):
             "transfer",
             {
                 "from": bob, "to": locktimer,
-                "quantity": "0.0253 EOS", "memo":"createtimer"
+                "quantity": "0.0953 EOS", "memo":"createtimer"
             },
             bob)
         token_host.push_action(
             "transfer",
             {
                 "from": charlie, "to": locktimer,
-                "quantity": "0.0353 EOS", "memo":"createtimer"
+                "quantity": "0.0853 EOS", "memo":"createtimer"
             },
             charlie)
         token_host.push_action(
             "transfer",
             {
                 "from": charlie, "to": locktimer,
-                "quantity": "0.0372 EOS", "memo":"createtimer"
+                "quantity": "0.0972 EOS", "memo":"createtimer"
             },
             charlie)
         token_host.push_action(
             "transfer",
             {
                 "from": charlie, "to": locktimer,
-                "quantity": "0.0321 EOS", "memo":"createtimer"
+                "quantity": "0.0821 EOS", "memo":"createtimer"
             },
             charlie)
         token_host.push_action(
             "transfer",
             {
                 "from": bob, "to": locktimer,
-                "quantity": "0.0258 EOS", "memo":"createtimer"
+                "quantity": "0.0958 EOS", "memo":"createtimer"
             },
             bob)
         token_host.push_action(
             "transfer",
             {
                 "from": charlie, "to": locktimer,
-                "quantity": "0.0352 EOS", "memo":"createtimer"
+                "quantity": "0.0852 EOS", "memo":"createtimer"
             },
             charlie)
         token_host.push_action(
             "transfer",
             {
                 "from": charlie, "to": locktimer,
-                "quantity": "0.0379 EOS", "memo":"createtimer"
+                "quantity": "0.0979 EOS", "memo":"createtimer"
             },
             charlie)
         token_host.push_action(
             "transfer",
             {
                 "from": charlie, "to": locktimer,
-                "quantity": "0.0320 EOS", "memo":"createtimer"
+                "quantity": "0.0920 EOS", "memo":"createtimer"
             },
             charlie)
 
@@ -401,7 +401,7 @@ class TestStringMethods(unittest.TestCase):
             "transfer",
             {
                 "from": bob, "to": locktimer,
-                "quantity": "0.0213 EOS", "memo":"createtimer"
+                "quantity": "0.0913 EOS", "memo":"createtimer"
             },
             bob)
         for i in range(7):
@@ -476,7 +476,7 @@ class TestStringMethods(unittest.TestCase):
                 "transfer",
                 {
                     "from": bob, "to": locktimer,
-                    "quantity": "0.0213 EOS", "memo":"createtimer"
+                    "quantity": "0.0913 EOS", "memo":"createtimer"
                 },
                 bob)
             locktimer.push_action (
