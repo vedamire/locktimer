@@ -62,4 +62,4 @@ Action that fired by deferred transaction to automaticly send money to the recei
   * uint64_t send_id (deferred transaction id)
   * uint64_t id (Id of record associated with this deferred transaction)
 
-Action that is needed to get around 45 days delay limit. It recursively calles itself through 45 days until left delay is less than 45 days.
+Action that is needed to get around 45 days delay limit. It recursively calles itself through 45 days until left delay is less than 45 days. Can be called only by contract itself.
