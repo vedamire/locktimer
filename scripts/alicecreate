@@ -1,1 +1,0 @@
-cleos push action eosio.token transfer '["alice", "locktimer", "0.0450 SYS", "createtimer"]' -p alice@active
