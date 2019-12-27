@@ -126,7 +126,7 @@ class TestStringMethods(unittest.TestCase):
             charlie)
         lockConsole()
         locktimer.table("timerv1", locktimer);
-        self.assertTrue("0.0750 EOS" in getVal())
+        self.assertTrue("0.0450 EOS" in getVal())
         locktimer.push_action (
             "lock",
             {
@@ -144,14 +144,14 @@ class TestStringMethods(unittest.TestCase):
 
         lockConsole()
         token_host.table("accounts", bob)
-        self.assertTrue("0750 EOS" in getVal());
-        token_host.push_action(
-            "transfer",
-            {
-                "from": bob, "to": charlie,
-                "quantity": "0.0750 EOS", "memo":"createtimer"
-            },
-            bob)
+        self.assertTrue("0450 EOS" in getVal());
+        # token_host.push_action(
+        #     "transfer",
+        #     {
+        #         "from": bob, "to": charlie,
+        #         "quantity": "0.0750 EOS", "memo":"createtimer"
+        #     },
+        #     bob)
 
     def test_cancel(self):
 
@@ -409,7 +409,7 @@ class TestStringMethods(unittest.TestCase):
                 "transfer",
                 {
                     "from": charlie, "to": locktimer,
-                    "quantity": "0.0" + str(i) + "53 EOS", "memo":"createtimer"
+                    "quantity": "0." + str(i+1) + "053 EOS", "memo":"createtimer"
                 },
                 charlie)
 

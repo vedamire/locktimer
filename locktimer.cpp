@@ -41,7 +41,7 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
   public:
     using contract::contract;
     locktimer(name receiver, name code, datastream<const char *> ds) : contract(receiver, code, ds), lock_symbol("EOS", 4),
-    FEE(0.0300, this->lock_symbol), MIN(0.0500, this-> lock_symbol),
+    FEE(300, this->lock_symbol), MIN(500, this-> lock_symbol),
     table(_self, _self.value) {}
 
     [[eosio::on_notify("eosio.token::transfer")]]
@@ -51,6 +51,7 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
       check(quantity.amount > 0, "When pigs fly");
       check(quantity.symbol == lock_symbol, "These are not the droids you are looking for.");
       if(memo == "createtimer") {
+        if(quantity < MIN) print(quantity);
         check(quantity >= MIN, "Minimum amount of deposit is 0.0500 EOS. Be aware that the fee is 0.0300 EOS");
         uint64_t primary_key = table.available_primary_key();
         table.emplace(get_self(), [&](auto &row) {
