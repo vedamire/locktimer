@@ -1,0 +1,34 @@
+Public Key: EOS8XfSfeHr9Aaa4Erc83oCbTSaRRNdQxLxyZXJTL1QJctqLbbwPZ
+Private key: 5KZhqiPaGLMtT3L4dSEHWpNFCYqDLmV4agC3Ddz7zwtV9YEUBr2
+
+locktesterv1
+
+sometesterv1
+
+sometesterv2
+
+locktimer
+PW5KLcWQNtRDgJeKdnaMNe4jY27UtocLwZUa18wCBsvxYvNxgbqfk"
+
+
+eosfactory
+Account Name: lp4vkjzwxtaa
+Owner Public Key: EOS5QApssrLJ7tsfxt74XjGrWXya5qUtSCU79eoTZR1b7X64NyeNb
+Active Public Key: EOS8VePsj55JridqTy1Cy7TYqUeAwbcr483ip3zEDruSJZySZZd6H
+
+Owner Private Key: 5HxH5rJdiLct6usiSXXRmRtvz2KyhNQWVXusCd62PhydvaX8JL9
+Active Private Key: 5KQk6yyNY9Y91FZ7RqoztfNNfNCkq9wK2CkqfSSiQXXvMa7ekda
+
+Use the following data to register a new account on a public testnet:
+Account Name: m5ob3w1loztp
+Owner Public Key: EOS7G25q8N1Er7b6LhofPoJrxpDn1PxZ45ACo8AqprEKfPoFn8C8F
+Active Public Key: EOS7R8LNBHftsE5D5wv6UKB9NuWgafFwjBUetPR2wS1E2AEeQxCXN
+
+Owner Private Key: 5JEQvz3xpnw4zxm3XBc4VFT1HZ2Ypjvg7o4wjq3mVw6B6axsYNT
+Active Private Key: 5KJetrStqXJ5qepqGtfqgwuwqVhC5xAJYcGHf8TCkmAGo9xFGPk
+
+myjungle:  m5ob3w1loztp @ http://145.239.133.201:8888
+
+python3 -m eosfactory.register_testnet https://jungle2.cryptolions.io:443 myjungle -a locktesterv1 5KZhqiPaGLMtT3L4dSEHWpNFCYqDLmV4agC3Ddz7zwtV9YEUBr2 5KZhqiPaGLMtT3L4dSEHWpNFCYqDLmV4agC3Ddz7zwtV9YEUBr2
+https://jungle2.cryptolions.io:443
+myjungle:  locktesterv1 @ https://jungle2.cryptolions.io:443
