@@ -57,7 +57,7 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
         table.emplace(get_self(), [&](auto &row) {
           row.id = primary_key;
           row.sender = sender;
-          row.receiver = _self;
+          row.receiver = sender;
           row.quantity = quantity - FEE;
           row.is_sent = false;
           row.start_date = NULL;
@@ -98,6 +98,13 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
       check(timer != table.end(), "Timer with this id doesn't exist");
       check(timer->sender == sender, "You are not the owner of this timer");
       check(timer->is_sent == false, "Money are already locked and can't be unlocked until the date");
+
+      action{
+          permission_level{get_self(), "active"_n},
+          "eosio.token"_n,
+          "transfer"_n,
+          std::make_tuple(get_self(), timer->sender, timer->quantity, std::string("You canceled your timer and got your money!"))
+      }.send();
       table.erase(timer);
     }
 

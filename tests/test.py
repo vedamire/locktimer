@@ -162,6 +162,21 @@ class TestStringMethods(unittest.TestCase):
                 "quantity": "0.0650 EOS", "memo":"createtimer"
             },
             bob)
+        lockConsole()
+        token_host.table("accounts", bob);
+        js = correct(getVal())[0]["balance"];
+        self.assertEqual(js, "49.4350 EOS");
+        locktimer.push_action (
+            "cancel",
+            {
+                "sender": bob,
+                "id": 0
+            },
+        permission=(bob, Permission.ACTIVE));
+        token_host.table("accounts", bob);
+        js = correct(getVal())[0]["balance"];
+        self.assertEqual(js, "49.4700 EOS");
+
         token_host.push_action(
             "transfer",
             {
@@ -207,6 +222,7 @@ class TestStringMethods(unittest.TestCase):
         lockConsole()
         locktimer.table("timerv1", locktimer);
         val = getVal()
+
         self.assertTrue('"id": 3,' in val)
         self.assertFalse('"id": 2,' in val)
         self.assertFalse('"id": 0,' in val)
