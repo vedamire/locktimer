@@ -1,2 +1,7 @@
 scripts/nodeos.log
-build/
+build//locktimer.wasm
+
+locktimer.abi
+locktimer.wasm
+
+tests/unittests.py

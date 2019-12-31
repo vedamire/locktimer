@@ -84,6 +84,8 @@ def toStr(quantity):
     return str(quantity) + getBase(quantity);
 def Balance(name):
     return token_host.table("accounts", name).json["rows"][0]["balance"]
+def now():
+    return int(time.time())
 class TestStringMethods(unittest.TestCase):
     # def tearDown(self):
     #     stop();
@@ -153,35 +155,32 @@ class TestStringMethods(unittest.TestCase):
     def test_single(self):
         quantity = "8.0000 EOS";
 
-        # token_host.push_action(
-        #     "transfer",
-        #     {
-        #         "from": bob, "to": locktimer1,
-        #         "quantity": quantity, "memo":"createtimer"
-        #     },
-        #     bob)
-        # table = locktimer1.table("timerv1", locktimer1);
-        # balance = token_host.table("accounts", locktimer1);
-        # afterfee = afterFee(quantity);
-        # self.assertTrue(table.json["rows"][0]["quantity"] == afterfee);
-        # self.assertTrue(balance.json["rows"][0]["balance"] == quantity);
-        # locktimer1.push_action (
-        #     "lock",
-        #     {
-        #         "sender": bob,
-        #         "id": 0,
-        #         "receiver": charlie,
-        #         "date": now() + int(6)
-        #     },
-        #     permission=(charlie, Permission.ACTIVE))
-        # time.sleep(6);
-        # balance = token_host.table("accounts", charlie).json["rows"][0]["balance"];
-        # res = toStr(toFloat("50.0000 EOS") + toFloat(afterFee(quantity)));
-        # self.assertEqual(res, balance);
-        # table = locktimer.table("timerv1", locktimer);
-        # print(table.json)
-        # js = captureConsole(lambda _:wageservice.table("wagev1", wageservice))["rows"][0];
-        # print(js);
+        token_host.push_action(
+            "transfer",
+            {
+                "from": bob, "to": locktimer1,
+                "quantity": quantity, "memo":"createtimer"
+            },
+            bob)
+        table = locktimer1.table("timerv1", locktimer1);
+        balance = token_host.table("accounts", locktimer1);
+        afterfee = afterFee(quantity);
+        self.assertTrue(table.json["rows"][0]["quantity"] == afterfee);
+        self.assertTrue(balance.json["rows"][0]["balance"] == quantity);
+        locktimer1.push_action (
+            "lock",
+            {
+                "sender": bob,
+                "id": 0,
+                "receiver": charlie,
+                "date": now() + int(6)
+            },
+            permission=(bob, Permission.ACTIVE))
+        time.sleep(6);
+        balance = token_host.table("accounts", charlie).json["rows"][0]["balance"];
+        res = toStr(toFloat("50.0000 EOS") + toFloat(afterFee(quantity)));
+        self.assertEqual(res, balance);
+
     # def test_multiple(self):
     #     # time.sleep(10)
     #     for i in range(5):
