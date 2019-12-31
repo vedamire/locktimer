@@ -13,6 +13,7 @@ create_account("token_host", master, account_name="eosio.token")
 create_account("locktimer", master, account_name="locktimer")
 create_account("locktimer1", master, account_name="locktimer1")
 create_account("locktimer2", master, account_name="locktimer2")
+create_account("locktimer3", master, account_name="locktimer3")
 
 
 
@@ -20,11 +21,14 @@ token = Contract(token_host, "/home/ally/contracts/eosio.contracts/contracts/eos
 lock = Contract(locktimer, "/home/ally/contracts/locktimer")
 lock1 = Contract(locktimer1, "/home/ally/contracts/locktimer")
 lock2 = Contract(locktimer2, "/home/ally/contracts/locktimer")
+lock3 = Contract(locktimer3, "/home/ally/contracts/locktimer")
 
 
 locktimer.set_account_permission(Permission.ACTIVE, add_code=True)
 locktimer1.set_account_permission(Permission.ACTIVE, add_code=True)
 locktimer2.set_account_permission(Permission.ACTIVE, add_code=True)
+locktimer3.set_account_permission(Permission.ACTIVE, add_code=True)
+
 token_host.set_account_permission(Permission.ACTIVE, add_code=True)
 create_account("charlie", master)
 create_account("bob", master)
@@ -33,7 +37,7 @@ token.deploy()
 lock.deploy()
 lock1.deploy()
 lock2.deploy()
-
+lock3.deploy()
 token_host.push_action(
     "create",
         {
@@ -218,6 +222,7 @@ class TestStringMethods(unittest.TestCase):
                 },
                 permission=(charlie, Permission.ACTIVE))
         time.sleep(6);
+        self.assertEqual(len(Rows(locktimer2)), 0);
 
         balance = Balance(bob);
         total = toStr(toFloat("50.000 EOS") + toFloat(affee) * 5)
@@ -231,22 +236,24 @@ class TestStringMethods(unittest.TestCase):
             token_host.push_action(
                 "transfer",
                 {
-                    "from": charlie, "to": locktimer2,
+                    "from": charlie, "to": locktimer3,
                     "quantity": quantity, "memo":"createtimer"
                 },
                 charlie);
-        # self.assertEqual(Balance(locktimer2), toStr(toFloat(quantity) * 5));
-        rows = Rows(locktimer2);
+
+        rows = Rows(locktimer3);
+
         for i in range(5):
             self.assertEqual(rows[i]["quantity"], toStr(toFloat(affee)))
         for i in range(5):
-            locktimer2.push_action(
+            locktimer3.push_action(
                 "cancel",
                 {
                     "sender": charlie, "id": i
                     # "quantity": quantity, "memo":"createtimer"
                 },
                 charlie)
+        self.assertEqual(len(Rows(locktimer3)), 0);
         balance = Balance(charlie);
         total = toStr(toFloat("50.000 EOS") - FEE * 5)
         self.assertEqual(balance, total)
