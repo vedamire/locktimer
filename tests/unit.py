@@ -12,14 +12,19 @@ create_master_account("master")
 create_account("token_host", master, account_name="eosio.token")
 create_account("locktimer", master, account_name="locktimer")
 create_account("locktimer1", master, account_name="locktimer1")
+create_account("locktimer2", master, account_name="locktimer2")
+
 
 
 token = Contract(token_host, "/home/ally/contracts/eosio.contracts/contracts/eosio.token")
 lock = Contract(locktimer, "/home/ally/contracts/locktimer")
 lock1 = Contract(locktimer1, "/home/ally/contracts/locktimer")
+lock2 = Contract(locktimer2, "/home/ally/contracts/locktimer")
+
 
 locktimer.set_account_permission(Permission.ACTIVE, add_code=True)
 locktimer1.set_account_permission(Permission.ACTIVE, add_code=True)
+locktimer2.set_account_permission(Permission.ACTIVE, add_code=True)
 token_host.set_account_permission(Permission.ACTIVE, add_code=True)
 create_account("charlie", master)
 create_account("bob", master)
@@ -27,7 +32,7 @@ create_account("zoro", master, account_name="zoro")
 token.deploy()
 lock.deploy()
 lock1.deploy()
-
+lock2.deploy()
 
 token_host.push_action(
     "create",
@@ -84,6 +89,8 @@ def toStr(quantity):
     return str(quantity) + getBase(quantity);
 def Balance(name):
     return token_host.table("accounts", name).json["rows"][0]["balance"]
+def Rows(contract):
+    return contract.table("timerv1", contract).json["rows"];
 def now():
     return int(time.time())
 class TestStringMethods(unittest.TestCase):
@@ -152,6 +159,7 @@ class TestStringMethods(unittest.TestCase):
             bob)
         balance = token_host.table("accounts", bob);
         self.assertTrue(balance.json["rows"][0]["balance"] == afterFee("50.0000 EOS"));
+
     def test_single(self):
         quantity = "8.0000 EOS";
 
@@ -181,16 +189,78 @@ class TestStringMethods(unittest.TestCase):
         res = toStr(toFloat("50.0000 EOS") + toFloat(afterFee(quantity)));
         self.assertEqual(res, balance);
 
+    def test_multiple(self):
+        quantity = "7.0000 EOS";
+        affee = afterFee(quantity);
+        for i in range(5):
+            time.sleep(1)
+            token_host.push_action(
+                "transfer",
+                {
+                    "from": charlie, "to": locktimer2,
+                    "quantity": quantity, "memo":"createtimer"
+                },
+                charlie);
+        # self.assertEqual(Balance(locktimer2), toStr(toFloat(quantity) * 5));
+        rows = Rows(locktimer2);
+        for row in rows:
+            self.assertEqual(row["quantity"], toStr(toFloat(affee)))
+
+        for i in range(5):
+            # time.sleep(1)
+            locktimer2.push_action (
+                "lock",
+                {
+                    "sender": charlie,
+                    "id": i,
+                    "receiver": bob,
+                    "date": now() + int(6)
+                },
+                permission=(charlie, Permission.ACTIVE))
+        time.sleep(6);
+
+        balance = Balance(bob);
+        total = toStr(toFloat("50.000 EOS") + toFloat(affee) * 5)
+        self.assertEqual(balance, total)
+
+    def test_multiple_cancel(self):
+        quantity = "4.0000 EOS";
+        affee = afterFee(quantity);
+        for i in range(5):
+            time.sleep(1)
+            token_host.push_action(
+                "transfer",
+                {
+                    "from": charlie, "to": locktimer2,
+                    "quantity": quantity, "memo":"createtimer"
+                },
+                charlie);
+        # self.assertEqual(Balance(locktimer2), toStr(toFloat(quantity) * 5));
+        rows = Rows(locktimer2);
+        for i in range(5):
+            self.assertEqual(rows[i]["quantity"], toStr(toFloat(affee)))
+        for i in range(5):
+            locktimer2.push_action(
+                "cancel",
+                {
+                    "sender": charlie, "id": i
+                    # "quantity": quantity, "memo":"createtimer"
+                },
+                charlie)
+        balance = Balance(charlie);
+        total = toStr(toFloat("50.000 EOS") - FEE * 5)
+        self.assertEqual(balance, total)
+# Check tables modification
     # def test_multiple(self):
     #     # time.sleep(10)
-    #     for i in range(5):
-    #         token_host.push_action(
-    #             "transfer",
-    #             {
-    #                 "from": charlie, "to": wageservice1,
-    #                 "quantity": "" + str(i+4) + ".0300 EOS", "memo":"placewage"
-    #             },
-    #             charlie);
+        # for i in range(5):
+        #     token_host.push_action(
+        #         "transfer",
+        #         {
+        #             "from": charlie, "to": wageservice1,
+        #             "quantity": "" + str(i+4) + ".0300 EOS", "memo":"placewage"
+        #         },
+        #         charlie);
     #     arr = captureConsole(lambda _: wageservice1.table("wagev1", wageservice1))["rows"];
     #
     #     for i in range(5):
