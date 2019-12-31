@@ -149,11 +149,10 @@ class TestStringMethods(unittest.TestCase):
                 "quantity": quantity, "memo":"createtimer"
             },
             bob)
-        table = locktimer.table("timerv1", locktimer);
-        balance = token_host.table("accounts", locktimer);
+
         afterfee = afterFee(quantity);
-        self.assertTrue(table.json["rows"][0]["quantity"] == afterfee);
-        self.assertTrue(balance.json["rows"][0]["balance"] == quantity);
+        self.assertTrue(Rows(locktimer)[0]["quantity"] == afterfee);
+        # self.assertTrue(Balance(locktimer) == quantity);
         locktimer.push_action(
             "cancel",
             {
@@ -161,8 +160,7 @@ class TestStringMethods(unittest.TestCase):
                 # "quantity": quantity, "memo":"createtimer"
             },
             bob)
-        balance = token_host.table("accounts", bob);
-        self.assertTrue(balance.json["rows"][0]["balance"] == afterFee("50.0000 EOS"));
+        self.assertTrue(Balance(bob) == afterFee("50.0000 EOS"));
 
     def test_single(self):
         quantity = "8.0000 EOS";
@@ -174,11 +172,9 @@ class TestStringMethods(unittest.TestCase):
                 "quantity": quantity, "memo":"createtimer"
             },
             bob)
-        table = locktimer1.table("timerv1", locktimer1);
-        balance = token_host.table("accounts", locktimer1);
+        self.assertEqual(len(Rows(locktimer1)), 1);
         afterfee = afterFee(quantity);
-        self.assertTrue(table.json["rows"][0]["quantity"] == afterfee);
-        self.assertTrue(balance.json["rows"][0]["balance"] == quantity);
+        self.assertTrue(Rows(locktimer1)[0]["quantity"] == afterfee);
         locktimer1.push_action (
             "lock",
             {
@@ -189,7 +185,9 @@ class TestStringMethods(unittest.TestCase):
             },
             permission=(bob, Permission.ACTIVE))
         time.sleep(6);
-        balance = token_host.table("accounts", charlie).json["rows"][0]["balance"];
+        self.assertEqual(len(Rows(locktimer1)), 0);
+
+        balance = Balance(charlie);
         res = toStr(toFloat("50.0000 EOS") + toFloat(afterFee(quantity)));
         self.assertEqual(res, balance);
 
@@ -205,10 +203,9 @@ class TestStringMethods(unittest.TestCase):
                     "quantity": quantity, "memo":"createtimer"
                 },
                 charlie);
-        # self.assertEqual(Balance(locktimer2), toStr(toFloat(quantity) * 5));
         rows = Rows(locktimer2);
-        for row in rows:
-            self.assertEqual(row["quantity"], toStr(toFloat(affee)))
+        for i in range(5):
+            self.assertEqual(rows[i]["quantity"], toStr(toFloat(affee)))
 
         for i in range(5):
             # time.sleep(1)
@@ -250,93 +247,12 @@ class TestStringMethods(unittest.TestCase):
                 "cancel",
                 {
                     "sender": charlie, "id": i
-                    # "quantity": quantity, "memo":"createtimer"
                 },
                 charlie)
         self.assertEqual(len(Rows(locktimer3)), 0);
         balance = Balance(charlie);
         total = toStr(toFloat("50.000 EOS") - FEE * 5)
         self.assertEqual(balance, total)
-# Check tables modification
-    # def test_multiple(self):
-    #     # time.sleep(10)
-        # for i in range(5):
-        #     token_host.push_action(
-        #         "transfer",
-        #         {
-        #             "from": charlie, "to": wageservice1,
-        #             "quantity": "" + str(i+4) + ".0300 EOS", "memo":"placewage"
-        #         },
-        #         charlie);
-    #     arr = captureConsole(lambda _: wageservice1.table("wagev1", wageservice1))["rows"];
-    #
-    #     for i in range(5):
-    #         self.assertEqual(arr[i]["id"], i);
-    #         self.assertEqual(arr[i]["is_specified"], False);
-    #     for i in range(5):
-    #         wageservice1.push_action(
-    #             "placewage",
-    #             {
-    #                 "employer": charlie,
-    #                 "id": i,
-    #                 "worker": bob,
-    #                 "days": 4
-    #             },
-    #             permission=(charlie, Permission.ACTIVE))
-    #     arr = captureConsole(lambda _: wageservice1.table("wagev1", wageservice1))["rows"];
-    #
-    #     for i in range(5):
-    #         self.assertEqual(arr[i]["is_accepted"], False);
-    #         self.assertEqual(arr[i]["is_specified"], True);
-    #         self.assertEqual(arr[i]["worker"], "bob");
-    #     for i in range(5):
-    #         wageservice1.push_action(
-    #             "acceptwage",
-    #             {
-    #                 "worker": bob,
-    #                 "id": i,
-    #                 "isaccepted": True
-    #             },
-    #             permission=(bob, Permission.ACTIVE))
-    #     arr = captureConsole(lambda _: wageservice1.table("wagev1", wageservice1))["rows"];
-    #     for i in range(5):
-    #         # self.assertEqual(arr[i]["id"], i);
-    #         self.assertEqual(arr[i]["is_accepted"], True);
-    #     for i in range(5):
-    #         for r in range(4):
-    #             time.sleep(0.5)
-    #             wageservice1.push_action(
-    #                 "addworkday",
-    #                 {
-    #                     "employer": charlie,
-    #                     "id": i
-    #                 },
-    #                 permission=(charlie, Permission.ACTIVE));
-    #     arr = captureConsole(lambda _: wageservice1.table("wagev1", wageservice1))["rows"];
-    #     for i in range(5):
-    #         # self.assertEqual(arr[i]["id"], i);
-    #         self.assertEqual(arr[i]["worked_days"], 4);
-    #     for i in range(5):
-    #         wageservice1.push_action(
-    #             "closewage",
-    #             {
-    #                 "employer": charlie,
-    #                 "id": i
-    #             },
-    #             permission=(charlie, Permission.ACTIVE))
-        # arr = captureConsole(lambda _: wageservice1.table("wagev1", wageservice1))["rows"];
 
-        # self.assertEqual(getBalance(wageservice1), 0);
-        # print(js);
-        # def test_double(self):
-        #
-        #     token_host.push_action(
-        #         "transfer",
-        #         {
-        #             "from": bob, "to": wageservice,
-        #             "quantity": "6.0000 EOS", "memo":"placewage"
-        #         },
-        #         bob)
-        #     js = captureConsole(lambda _:wageservice.table("wagev1", wageservice))["rows"][0];
 if __name__ == '__main__':
     unittest.main()
