@@ -14,20 +14,23 @@ create_account("locktimer", master, account_name="locktimer")
 create_account("locktimer1", master, account_name="locktimer1")
 create_account("locktimer2", master, account_name="locktimer2")
 create_account("locktimer3", master, account_name="locktimer3")
-
-
+create_account("locktimer4", master, account_name="locktimer4")
+create_account("locktimer5", master, account_name="locktimer5")
 
 token = Contract(token_host, "/home/ally/contracts/eosio.contracts/contracts/eosio.token")
 lock = Contract(locktimer, "/home/ally/contracts/locktimer")
 lock1 = Contract(locktimer1, "/home/ally/contracts/locktimer")
 lock2 = Contract(locktimer2, "/home/ally/contracts/locktimer")
 lock3 = Contract(locktimer3, "/home/ally/contracts/locktimer")
-
+lock4 = Contract(locktimer4, "/home/ally/contracts/locktimer")
+lock5 = Contract(locktimer5, "/home/ally/contracts/locktimer")
 
 locktimer.set_account_permission(Permission.ACTIVE, add_code=True)
 locktimer1.set_account_permission(Permission.ACTIVE, add_code=True)
 locktimer2.set_account_permission(Permission.ACTIVE, add_code=True)
 locktimer3.set_account_permission(Permission.ACTIVE, add_code=True)
+locktimer4.set_account_permission(Permission.ACTIVE, add_code=True)
+locktimer5.set_account_permission(Permission.ACTIVE, add_code=True)
 
 token_host.set_account_permission(Permission.ACTIVE, add_code=True)
 create_account("charlie", master)
@@ -38,6 +41,8 @@ lock.deploy()
 lock1.deploy()
 lock2.deploy()
 lock3.deploy()
+lock4.deploy()
+lock5.deploy()
 token_host.push_action(
     "create",
         {
@@ -253,6 +258,262 @@ class TestStringMethods(unittest.TestCase):
         balance = Balance(charlie);
         total = toStr(toFloat("50.000 EOS") - FEE * 5)
         self.assertEqual(balance, total)
+    def test_ext_errors(self):
+        try:
+            token_host.push_action(
+                "transfer",
+                {
+                    "from": charlie, "to": locktimer4,
+                    "quantity": "0.0200 EOS", "memo":"createtimer"
+                },
+                charlie);
+            self.assertEqual("Transfering below MIN 0.0200 EOS", "");
+        except Error as err:
+            print("min passed")
+        try:
+            token_host.push_action(
+                "transfer",
+                {
+                    "from": charlie, "to": locktimer4,
+                    "quantity": "0.0900 EOS", "memo":"wrongmemo"
+                },
+                charlie);
+            self.assertEqual("transfering with wrong memo", "");
+        except Error as err:
+            print("wrong memo passed")
+        token_host.push_action(
+            "transfer",
+            {
+                "from": charlie, "to": locktimer4,
+                "quantity": "0.0900 EOS", "memo":"createtimer"
+            },
+            charlie);
+
+        token_host.push_action(
+            "transfer",
+            {
+                "from": charlie, "to": locktimer4,
+                "quantity": "0.0800 EOS", "memo":"createtimer"
+            },
+            charlie);
+        locktimer4.push_action (
+            "lock",
+            {
+                "sender": charlie,
+                "id": 1,
+                "receiver": bob,
+                "date": now() + int(1000)
+            }, charlie)
+
+        try:
+            locktimer4.push_action (
+                "lock",
+                {
+                    "sender": charlie,
+                    "id": 0,
+                    "receiver": bob,
+                    "date": now() + int(6)
+                })
+            self.assertEqual("Locking without auth", "");
+        except Error as err:
+            print("lock auth passed")
+        try:
+            locktimer4.push_action (
+                "lock",
+                {
+                    "sender": charlie,
+                    "id": 0,
+                    "receiver": "marva",
+                    "date": now() + int(6)
+                },
+                permission=(charlie, Permission.ACTIVE))
+            self.assertEqual("Locking to unexisting receiver", "");
+        except Error as err:
+            print("lock wrong receiver passed")
+
+        try:
+            locktimer4.push_action (
+                "lock",
+                {
+                    "sender": charlie,
+                    "id": 0,
+                    "receiver": bob,
+                    "date": now() - int(6)
+                },
+                permission=(charlie, Permission.ACTIVE))
+            self.assertEqual("Locking with passed date", "");
+        except Error as err:
+            print("lock date passed")
+
+        try:
+            locktimer4.push_action (
+                "lock",
+                {
+                    "sender": charlie,
+                    "id": 0,
+                    "receiver": bob,
+                    "date": now() + int(71556926)
+                },
+                permission=(charlie, Permission.ACTIVE))
+            self.assertEqual("Locking with date > 2 years", "");
+        except Error as err:
+            print("lock date > 2 years passed")
+        try:
+            locktimer4.push_action (
+                "lock",
+                {
+                    "sender": charlie,
+                    "id": 5,
+                    "receiver": bob,
+                    "date": now() + int(6)
+                },
+                permission=(charlie, Permission.ACTIVE))
+            self.assertEqual("Locking with not existing id", "");
+        except Error as err:
+            print("lock wrong id passed")
+
+        try:
+            locktimer4.push_action (
+                "lock",
+                {
+                    "sender": charlie,
+                    "id": 0,
+                    "receiver": bob,
+                    "date": now() + int(6)
+                },
+                permission=(bob, Permission.ACTIVE))
+            self.assertEqual("Locking without ownership", "");
+        except Error as err:
+            print("lock ownership passed")
+
+        try:
+            locktimer4.push_action (
+                "cancel",
+                {
+                    "sender": charlie,
+                    "id": 0
+                })
+            self.assertEqual("Cancel without auth", "");
+        except Error as err:
+            print("cancel auth passed")
+
+        try:
+            locktimer4.push_action (
+                "cancel",
+                {
+                    "sender": charlie,
+                    "id": 4
+                },
+                permission=(charlie, Permission.ACTIVE))
+            self.assertEqual("Cancel with wrong id", "");
+        except Error as err:
+            print("cancel wrong id passed")
+        try:
+            locktimer4.push_action (
+                "cancel",
+                {
+                    "sender": charlie,
+                    "id": 0
+                },
+                permission=(bob, Permission.ACTIVE))
+            self.assertEqual("Cancel without ownership", "");
+        except Error as err:
+            print("cancel ownership passed")
+
+        try:
+            locktimer4.push_action (
+                "cancel",
+                {
+                    "sender": charlie,
+                    "id": 1
+                },
+                permission=(charlie, Permission.ACTIVE))
+            self.assertEqual("Cancel already sent timer", "");
+        except Error as err:
+            print("cancel unsent passed")
+
+        try:
+            locktimer4.push_action (
+                "claimmoney",
+                {
+                    "sender": charlie,
+                    "id": 1
+                })
+            self.assertEqual("Claim without auth", "");
+        except Error as err:
+            print("claim auth passed")
+
+        try:
+            locktimer4.push_action (
+                "claimmoney",
+                {
+                    "sender": charlie,
+                    "id": 5
+                },
+                permission=(charlie, Permission.ACTIVE))
+            self.assertEqual("Claim with wrong id", "");
+        except Error as err:
+            print("claim wrong id passed")
+
+        try:
+            locktimer4.push_action (
+                "claimmoney",
+                {
+                    "sender": bob,
+                    "id": 0
+                },
+                permission=(bob, Permission.ACTIVE))
+            self.assertEqual("Claim didn't sent timer", "");
+        except Error as err:
+            print("claim unsent passed")
+
+        try:
+            locktimer4.push_action (
+                "claimmoney",
+                {
+                    "sender": charlie,
+                    "id": 1
+                },
+                permission=(charlie, Permission.ACTIVE))
+            self.assertEqual("Claiming by not a receiver", "");
+        except Error as err:
+            print("claim receiver passed")
+        try:
+            locktimer4.push_action (
+                "claimmoney",
+                {
+                    "sender": bob,
+                    "id": 1
+                },
+                permission=(bob, Permission.ACTIVE))
+            self.assertEqual("Cancel with passed date", "");
+        except Error as err:
+            print("cancel date passed")
+    def test_int_errors(self):
+        try:
+            locktimer5.push_action (
+                "autosend",
+                {
+                    "id": 0,
+                },
+                permission=(bob, Permission.ACTIVE))
+            self.assertEqual("Accessed to autosend from outside", "");
+        except Error as err:
+            print("autosend passed")
+        try:
+            locktimer5.push_action (
+                "defertxt",
+                {
+                    "delay": 100,
+                    "sendid": 0,
+                    "_id": 0
+                },
+                permission=(bob, Permission.ACTIVE))
+            self.assertEqual("Accessed to defertxn from outside", "");
+        except Error as err:
+            print("defertxn passed")
+            # self.assertTrue("assertion failure with message" in format(err))
+
 
 if __name__ == '__main__':
     unittest.main()
