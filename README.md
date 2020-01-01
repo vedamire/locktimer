@@ -15,7 +15,7 @@ You need to have python 3 and eosfactory installed https://eosfactory.io/build/h
 ```bash
 cd tests
 python3 build.py
-python3 test.py
+python3 unit.py
 ```
 ## Actions:
 

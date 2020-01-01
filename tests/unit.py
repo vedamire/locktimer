@@ -516,17 +516,76 @@ class TestStringMethods(unittest.TestCase):
 
             print("cancel date passed")
     def test_int_errors(self):
+        token_host.push_action(
+            "transfer",
+            {
+                "from": charlie, "to": locktimer5,
+                "quantity": "0.0900 EOS", "memo":"createtimer"
+            },
+            charlie);
+
+        token_host.push_action(
+            "transfer",
+            {
+                "from": charlie, "to": locktimer5,
+                "quantity": "0.0800 EOS", "memo":"createtimer"
+            },
+            charlie);
+        locktimer5.push_action (
+            "lock",
+            {
+                "sender": charlie,
+                "id": 1,
+                "receiver": bob,
+                "date": now() + int(1000)
+            }, charlie)
         try:
             locktimer5.push_action (
                 "autosend",
                 {
-                    "id": 0,
+                    "id": 1,
                 },
                 permission=(bob, Permission.ACTIVE))
             self.assertEqual("Accessed to autosend from outside", "");
         except Error as err:
             self.assertTrue("missing authority of locktimer5" in err.message)
             print("autosend passed")
+        try:
+            locktimer5.push_action (
+                "autosend",
+                {
+                    "id": 5,
+                },
+                permission=(locktimer5, Permission.ACTIVE))
+            self.assertEqual("autosend wrong id", "");
+        except Error as err:
+            self.assertTrue("There's no wage contract with such an id" in err.message)
+            print("autosend wrong id passed")
+        try:
+            locktimer5.push_action (
+                "autosend",
+                {
+                    "id": 0,
+                },
+                permission=(locktimer5, Permission.ACTIVE))
+            self.assertEqual("autosend unsent timer", "");
+        except Error as err:
+            self.assertTrue("The transaction isn't sent yet" in err.message)
+            print("autosend wrong id passed")
+
+        try:
+            locktimer5.push_action (
+                "autosend",
+                {
+                    "id": 1,
+                },
+                permission=(locktimer5, Permission.ACTIVE))
+            self.assertEqual("autosend didn't passed time", "");
+        except Error as err:
+            self.assertTrue("Time isn't passed yet" in err.message)
+            print("autosend time passed")
+
+
         try:
             locktimer5.push_action (
                 "defertxn",
