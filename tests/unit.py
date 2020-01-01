@@ -269,6 +269,7 @@ class TestStringMethods(unittest.TestCase):
                 charlie);
             self.assertEqual("Transfering below MIN 0.0200 EOS", "");
         except Error as err:
+            self.assertTrue("Minimum amount of deposit is 0.0500 EOS" in err.message)
             print("min passed")
         try:
             token_host.push_action(
@@ -280,6 +281,7 @@ class TestStringMethods(unittest.TestCase):
                 charlie);
             self.assertEqual("transfering with wrong memo", "");
         except Error as err:
+            self.assertTrue("Wrong memo. To transfer money here use ether 'createtimer' or 'replenish' memo" in err.message)
             print("wrong memo passed")
         token_host.push_action(
             "transfer",
@@ -316,6 +318,7 @@ class TestStringMethods(unittest.TestCase):
                 })
             self.assertEqual("Locking without auth", "");
         except Error as err:
+            self.assertTrue("missing authority of charlie" in err.message)
             print("lock auth passed")
         try:
             locktimer4.push_action (
@@ -329,6 +332,7 @@ class TestStringMethods(unittest.TestCase):
                 permission=(charlie, Permission.ACTIVE))
             self.assertEqual("Locking to unexisting receiver", "");
         except Error as err:
+            self.assertTrue("Receiver's account doesn't exist" in err.message)
             print("lock wrong receiver passed")
 
         try:
@@ -343,6 +347,7 @@ class TestStringMethods(unittest.TestCase):
                 permission=(charlie, Permission.ACTIVE))
             self.assertEqual("Locking with passed date", "");
         except Error as err:
+            self.assertTrue("The date is already passed" in err.message)
             print("lock date passed")
 
         try:
@@ -357,6 +362,7 @@ class TestStringMethods(unittest.TestCase):
                 permission=(charlie, Permission.ACTIVE))
             self.assertEqual("Locking with date > 2 years", "");
         except Error as err:
+            self.assertTrue("Maximum delay supported from now is 2 years" in err.message)
             print("lock date > 2 years passed")
         try:
             locktimer4.push_action (
@@ -370,13 +376,14 @@ class TestStringMethods(unittest.TestCase):
                 permission=(charlie, Permission.ACTIVE))
             self.assertEqual("Locking with not existing id", "");
         except Error as err:
+            self.assertTrue("Timer with this id doesn't exist" in err.message)
             print("lock wrong id passed")
 
         try:
             locktimer4.push_action (
                 "lock",
                 {
-                    "sender": charlie,
+                    "sender": bob,
                     "id": 0,
                     "receiver": bob,
                     "date": now() + int(6)
@@ -384,6 +391,7 @@ class TestStringMethods(unittest.TestCase):
                 permission=(bob, Permission.ACTIVE))
             self.assertEqual("Locking without ownership", "");
         except Error as err:
+            self.assertTrue("You are not the owner of this timer" in err.message)
             print("lock ownership passed")
 
         try:
@@ -395,6 +403,8 @@ class TestStringMethods(unittest.TestCase):
                 })
             self.assertEqual("Cancel without auth", "");
         except Error as err:
+            self.assertTrue("missing authority of charlie" in err.message)
+
             print("cancel auth passed")
 
         try:
@@ -407,17 +417,21 @@ class TestStringMethods(unittest.TestCase):
                 permission=(charlie, Permission.ACTIVE))
             self.assertEqual("Cancel with wrong id", "");
         except Error as err:
+            self.assertTrue("Timer with this id doesn't exist" in err.message)
+
             print("cancel wrong id passed")
         try:
             locktimer4.push_action (
                 "cancel",
                 {
-                    "sender": charlie,
+                    "sender": bob,
                     "id": 0
                 },
                 permission=(bob, Permission.ACTIVE))
             self.assertEqual("Cancel without ownership", "");
         except Error as err:
+            self.assertTrue("You are not the owner of this timer" in err.message)
+
             print("cancel ownership passed")
 
         try:
@@ -430,64 +444,76 @@ class TestStringMethods(unittest.TestCase):
                 permission=(charlie, Permission.ACTIVE))
             self.assertEqual("Cancel already sent timer", "");
         except Error as err:
+            self.assertTrue("Money are already locked and can't be unlocked until the date" in err.message)
+
             print("cancel unsent passed")
 
         try:
             locktimer4.push_action (
                 "claimmoney",
                 {
-                    "sender": charlie,
+                    "receiver": bob,
                     "id": 1
                 })
             self.assertEqual("Claim without auth", "");
         except Error as err:
+            self.assertTrue("missing authority of bob" in err.message)
+
             print("claim auth passed")
 
         try:
             locktimer4.push_action (
                 "claimmoney",
                 {
-                    "sender": charlie,
+                    "receiver": bob,
                     "id": 5
                 },
-                permission=(charlie, Permission.ACTIVE))
+                permission=(bob, Permission.ACTIVE))
             self.assertEqual("Claim with wrong id", "");
         except Error as err:
+            self.assertTrue("Timer with this id doesn't exist" in err.message)
+
             print("claim wrong id passed")
 
         try:
             locktimer4.push_action (
                 "claimmoney",
                 {
-                    "sender": bob,
+                    "receiver": bob,
                     "id": 0
                 },
                 permission=(bob, Permission.ACTIVE))
             self.assertEqual("Claim didn't sent timer", "");
         except Error as err:
+            self.assertTrue("Money aren't sent yet" in err.message)
+
             print("claim unsent passed")
 
         try:
             locktimer4.push_action (
                 "claimmoney",
                 {
-                    "sender": charlie,
+                    "receiver": charlie,
                     "id": 1
                 },
                 permission=(charlie, Permission.ACTIVE))
             self.assertEqual("Claiming by not a receiver", "");
         except Error as err:
+            self.assertTrue("You are not the receiver of this timer" in err.message)
+
             print("claim receiver passed")
         try:
             locktimer4.push_action (
                 "claimmoney",
                 {
-                    "sender": bob,
+                    "receiver": bob,
                     "id": 1
                 },
                 permission=(bob, Permission.ACTIVE))
-            self.assertEqual("Cancel with passed date", "");
+            self.assertEqual("Cancel with haven't passed date", "");
         except Error as err:
+            self.assertTrue("Time isn't passed yet" in err.message)
+
             print("cancel date passed")
     def test_int_errors(self):
         try:
@@ -499,10 +525,11 @@ class TestStringMethods(unittest.TestCase):
                 permission=(bob, Permission.ACTIVE))
             self.assertEqual("Accessed to autosend from outside", "");
         except Error as err:
+            self.assertTrue("missing authority of locktimer5" in err.message)
             print("autosend passed")
         try:
             locktimer5.push_action (
-                "defertxt",
+                "defertxn",
                 {
                     "delay": 100,
                     "sendid": 0,
@@ -511,6 +538,8 @@ class TestStringMethods(unittest.TestCase):
                 permission=(bob, Permission.ACTIVE))
             self.assertEqual("Accessed to defertxn from outside", "");
         except Error as err:
+            self.assertTrue("missing authority of locktimer5" in err.message)
+
             print("defertxn passed")
             # self.assertTrue("assertion failure with message" in format(err))
 
