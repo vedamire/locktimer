@@ -75,10 +75,10 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
     void lock(const name& sender, const uint64_t& id, const name& receiver, const uint32_t& date) {
       require_auth(sender);
       check(is_account(receiver), "Receiver's account doesn't exist");
+      check(receiver != get_self(), "Can't set contract itself as a receiver");
       check(now() < date, "The date is already passed");
       const uint32_t twoyears = 31556926 + 31556926;
       check(date - now() <= twoyears, "Maximum delay supported from now is 2 years");
-
       auto timer = table.find(id);
       check(timer != table.end(), "Timer with this id doesn't exist");
       check(timer->sender == sender, "You are not the owner of this timer");

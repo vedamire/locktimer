@@ -341,6 +341,21 @@ class TestStringMethods(unittest.TestCase):
                 {
                     "sender": charlie,
                     "id": 0,
+                    "receiver": locktimer4,
+                    "date": now() + int(6)
+                },
+                permission=(charlie, Permission.ACTIVE))
+            self.assertEqual("Locking with receiver contract itself", "");
+        except Error as err:
+            self.assertTrue("Can't set contract itself as a receiver" in err.message)
+            print("lock contract receiver passed")
+
+        try:
+            locktimer4.push_action (
+                "lock",
+                {
+                    "sender": charlie,
+                    "id": 0,
                     "receiver": bob,
                     "date": now() - int(6)
                 },
