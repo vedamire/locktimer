@@ -411,6 +411,20 @@ class TestStringMethods(unittest.TestCase):
 
         try:
             locktimer4.push_action (
+                "lock",
+                {
+                    "sender": charlie,
+                    "id": 1,
+                    "receiver": bob,
+                    "date": now() + int(1000)
+                }, charlie)
+            self.assertEqual("Locking alredy locked", "");
+
+        except Error as err:
+            self.assertTrue("This timer is already locked" in err.message);
+            print("locking unlocked passed");
+        try:
+            locktimer4.push_action (
                 "cancel",
                 {
                     "sender": charlie,

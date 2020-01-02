@@ -25,6 +25,7 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
 
    typedef eosio::singleton<"counter"_n, counter> counter_table;
    counter_table counters;
+
     struct [[eosio::table]] timer
     {
       uint64_t id;
@@ -91,6 +92,7 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
       auto timer = table.find(id);
       check(timer != table.end(), "Timer with this id doesn't exist");
       check(timer->sender == sender, "You are not the owner of this timer");
+      check(timer->is_sent == false, "This timer is already locked");
       table.modify(timer, get_self(), [&](auto& row) {
         row.receiver = receiver;
         row.start_date = now();
