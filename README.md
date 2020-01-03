@@ -1,5 +1,5 @@
 # Lock timer
-EOS smart contract that allows you to lock eos for a certain amount of time and then they will be automaticaly released.
+EOS smart contract that allows you to lock EOS for a certain amount of time and then they will be automaticaly released to the receiver that you want including you.
 
 
 ## Build
