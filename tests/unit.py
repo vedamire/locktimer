@@ -6,6 +6,8 @@ import json
 import string
 stdout = sys.stdout
 
+CONTRACT_DIR = "/home/ally/contracts/locktimer"
+
 reset()
 create_master_account("master")
 
@@ -18,12 +20,12 @@ create_account("locktimer4", master, account_name="locktimer4")
 create_account("locktimer5", master, account_name="locktimer5")
 
 token = Contract(token_host, "/home/ally/contracts/eosio.contracts/contracts/eosio.token")
-lock = Contract(locktimer, "/home/ally/contracts/locktimer")
-lock1 = Contract(locktimer1, "/home/ally/contracts/locktimer")
-lock2 = Contract(locktimer2, "/home/ally/contracts/locktimer")
-lock3 = Contract(locktimer3, "/home/ally/contracts/locktimer")
-lock4 = Contract(locktimer4, "/home/ally/contracts/locktimer")
-lock5 = Contract(locktimer5, "/home/ally/contracts/locktimer")
+lock = Contract(locktimer, CONTRACT_DIR)
+lock1 = Contract(locktimer1, CONTRACT_DIR)
+lock2 = Contract(locktimer2, CONTRACT_DIR)
+lock3 = Contract(locktimer3, CONTRACT_DIR)
+lock4 = Contract(locktimer4, CONTRACT_DIR)
+lock5 = Contract(locktimer5, CONTRACT_DIR)
 
 locktimer.set_account_permission(Permission.ACTIVE, add_code=True)
 locktimer1.set_account_permission(Permission.ACTIVE, add_code=True)

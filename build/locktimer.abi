@@ -50,10 +50,6 @@
                     "type": "uint32"
                 },
                 {
-                    "name": "sendid",
-                    "type": "uint64"
-                },
-                {
                     "name": "_id",
                     "type": "uint64"
                 }
