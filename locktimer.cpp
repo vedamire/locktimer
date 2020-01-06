@@ -10,8 +10,6 @@
 
 using namespace eosio;
 
-typedef std::function<void(const uint64_t*, const name*, const name*)> notify_func;
-
 class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
   private:
 
@@ -37,9 +35,11 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
       uint32_t end_date;
       uint64_t primary_key() const { return id; }
       uint64_t get_secondary_1() const { return sender.value;}
+      uint64_t get_secondary_2() const { return receiver.value;}
 
     };
-    typedef eosio::multi_index<"timerv1"_n, timer, indexed_by<"bysender"_n, const_mem_fun<timer, uint64_t, &timer::get_secondary_1>>> timer_index;
+    typedef eosio::multi_index<"timerv1"_n, timer, indexed_by<"bysender"_n, const_mem_fun<timer, uint64_t, &timer::get_secondary_1>>,
+     indexed_by<"byreceiver"_n, const_mem_fun<timer, uint64_t, &timer::get_secondary_2>>> timer_index;
 
     timer_index table;
 
@@ -67,7 +67,7 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
         table.emplace(get_self(), [&](auto &row) {
           row.id = primary_key;
           row.sender = sender;
-          row.receiver = sender;
+          row.receiver = get_self();
           row.quantity = quantity - FEE;
           row.is_sent = false;
           row.start_date = NULL;
