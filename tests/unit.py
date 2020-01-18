@@ -82,7 +82,7 @@ token_host.push_action(
         "quantity": "50.0000 EOS", "memo":""
     },
     zoro)
-FEE = 0.03
+FEE = 0.01
 
 def getBase(body):
     str_charl = str(body);
