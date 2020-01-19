@@ -52,7 +52,7 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
   public:
     using contract::contract;
     locktimer(name receiver, name code, datastream<const char *> ds) : contract(receiver, code, ds), ecoin_symbol("ECOIN", 2), ECOIN("ecointoken12"),
-     MIN(50, this-> ecoin_symbol),
+     MIN(5000, this-> ecoin_symbol),
     table(_self, _self.value), counters(_self, _self.value) {}
     [[eosio::on_notify("*::transfer")]]
     // [[eosio::on_notify("eosio.token::transfer")]]
@@ -111,13 +111,7 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
       check(timer->sender == sender, "You are not the owner of this timer");
       check(timer->is_sent == false, "Money are already locked and can't be unlocked until the date");
 
-      action{
-          permission_level{get_self(), "active"_n},
-          "eosio.token"_n,
-          "transfer"_n,
-          std::make_tuple(get_self(), timer->sender, timer->quantity, std::string("You canceled your timer and got your money!"))
-      }.send();
-      table.erase(timer);
+      release(timer, table, timer->sender);
     }
 
     [[eosio::action]]
@@ -128,7 +122,7 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
       check(timer->is_sent == true, "The transaction isn't sent yet");
       check(timer->end_date - 1 < now(), "Time isn't passed yet");
 
-      release(timer, table);
+      release(timer, table, timer->receiver);
     }
 
     [[eosio::action]]
@@ -168,7 +162,7 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
       check(timer->receiver == receiver, "You are not the receiver of this timer");
       check(timer->end_date - 1 < now(), "Time isn't passed yet");
 
-      release(timer, table);
+      release(timer, table, timer->receiver);
     }
 
     [[eosio::action]]
@@ -211,12 +205,12 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
       return newcounter.deferid;
     }
 
-    void release(const timer_index::const_iterator& timer, timer_index& table) {
+    void release(const timer_index::const_iterator& timer, timer_index& table, const name& receiver) {
       action{
         permission_level{get_self(), "active"_n},
         timer->token,
         "transfer"_n,
-        std::make_tuple(get_self(), timer->receiver, timer->quantity, std::string("Locked money are released!"))
+        std::make_tuple(get_self(), receiver, timer->quantity, std::string("Locked money are released!"))
       }.send();
       table.erase(timer);
     }

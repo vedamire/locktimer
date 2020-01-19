@@ -85,6 +85,22 @@ ecoin_host.push_action(
     },
     permission=(zoro, Permission.ACTIVE))
 
+token_host.push_action(
+    "create",
+        {
+        "issuer": zoro,
+        "maximum_supply": "1000000000.00 ECOIN",
+        "can_freeze": "0",
+        "can_recall": "0",
+        "can_whitelist": "0"
+    }, [zoro, token_host])
+
+token_host.push_action(
+    "issue",
+    {
+        "to": zoro, "quantity": "100000.00 ECOIN", "memo": ""
+    },
+    permission=(zoro, Permission.ACTIVE))
 # token_host.push_action(
 #     "issue",
 #     {
@@ -199,7 +215,91 @@ class TestStringMethods(unittest.TestCase):
             self.assertTrue("You have expanded your 5 timers. Lock Ecoin without limits" in err.message)
             print("timers bound passed")
 
+        try:
+            token_host.push_action(
+                "transfer",
+                {
+                    "from": zoro, "to": locktime1r,
+                    "quantity": "101.00 ECOIN" , "memo":"createtimer"
+                },
+                zoro);
+            self.assertEqual("Creating timer without checking contract", "");
+        except Error as err:
+            self.assertTrue("You have expanded your 5 timers. Lock Ecoin without limits" in err.message)
+            print("timers contract passed")
+        try:
+            ecoin_host.push_action(
+                "transfer",
+                {
+                    "from": zoro, "to": locktime1r,
+                    "quantity": "2.00 ECOIN" , "memo":"createtimer"
+                },
+                zoro);
+            self.assertEqual("creating ecoins timer without minimum", "");
+        except Error as err:
+            self.assertTrue("Minimum amount" in err.message)
+            print("timers ecoin minimum passed")
+        ecoin_host.push_action(
+            "transfer",
+            {
+                "from": zoro, "to": locktime1r,
+                "quantity": "103.00 ECOIN" , "memo":"createtimer"
+            },
+            zoro);
+    def test_token(self):
+        ecoin_host.push_action(
+            "transfer",
+            {
+                "from": zoro, "to": bob,
+                "quantity": "1000.00 ECOIN", "memo":""
+            },
+            zoro)
+        quantity = "100.00 ECOIN";
+        ecoin_host.push_action(
+            "transfer",
+            {
+                "from": bob, "to": locktimer,
+                "quantity": quantity, "memo":"createtimer"
+            },
+            bob)
 
+        # afterfee = afterFee(quantity);
+        self.assertTrue(Rows(locktimer)[0]["quantity"] == quantity and Rows(locktimer)[0]["token"] == "ecointoken12");
+        # self.assertTrue(Balance(locktimer) == quantity);
+        locktimer.push_action(
+            "cancel",
+            {
+                "sender": bob, "id": 0
+                # "quantity": quantity, "memo":"createtimer"
+            },
+            bob)
+        balance = ecoin_host.table("accounts", bob).json["rows"][0]["balance"]
+        self.assertTrue(balance == "1000.00 ECOIN");
+        charlie_qty = "200.00 ECOIN";
+        ecoin_host.push_action(
+            "transfer",
+            {
+                "from": bob, "to": locktimer,
+                "quantity": charlie_qty, "memo":"createtimer"
+            },
+            bob)
+
+        # afterfee = afterFee(quantity);
+        self.assertTrue(Rows(locktimer)[0]["quantity"] == charlie_qty and Rows(locktimer)[0]["token"] == "ecointoken12");
+        locktimer.push_action (
+            "lock",
+            {
+                "sender": bob,
+                "id": 0,
+                "receiver": charlie,
+                "date": now() + int(4)
+            },
+            permission=(bob, Permission.ACTIVE))
+        time.sleep(4);
+        self.assertEqual(len(Rows(locktimer)), 0);
+
+        balance = ecoin_host.table("accounts", charlie).json["rows"][0]["balance"]
+        self.assertEqual(charlie_qty, balance);
     def test_cancel(self):
         # time.sleep(1)
         quantity = "6.0000 EOS";
@@ -211,8 +311,8 @@ class TestStringMethods(unittest.TestCase):
             },
             bob)
 
-        afterfee = afterFee(quantity);
-        self.assertTrue(Rows(locktimer)[0]["quantity"] == afterfee);
+        # afterfee = afterFee(quantity);
+        self.assertTrue(Rows(locktimer)[0]["quantity"] == quantity);
         # self.assertTrue(Balance(locktimer) == quantity);
         locktimer.push_action(
             "cancel",
