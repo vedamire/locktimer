@@ -13,10 +13,9 @@ using namespace eosio;
 class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
   private:
 
-    const symbol lock_symbol;
-    const asset FEE;
+    const symbol ecoin_symbol;
     const asset MIN;
-
+    const int LIMIT = 5;
     struct counter {
      uint64_t deferid;
    };
@@ -50,8 +49,8 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
 
   public:
     using contract::contract;
-    locktimer(name receiver, name code, datastream<const char *> ds) : contract(receiver, code, ds), lock_symbol("EOS", 4),
-    FEE(100, this->lock_symbol), MIN(500, this-> lock_symbol),
+    locktimer(name receiver, name code, datastream<const char *> ds) : contract(receiver, code, ds), ecoin_symbol("ECOIN", 0),
+     MIN(50, this-> ecoin_symbol),
     table(_self, _self.value), counters(_self, _self.value) {}
 
     [[eosio::on_notify("eosio.token::transfer")]]
@@ -59,16 +58,15 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
     {
       if (to != get_self() || sender == get_self()) return;
       check(quantity.amount > 0, "When pigs fly");
-      check(quantity.symbol == lock_symbol, "These are not the droids you are looking for.");
       if(memo == "createtimer") {
-        if(quantity < MIN) print(quantity);
-        check(quantity >= MIN, "Minimum amount of deposit is 0.0500 EOS");
+        check(!isLimit(sender) || quantity.symbol == ecoin_symbol, "You have expanded your 5 timers. Wait for release or lock Ecoin without limits");
+        if(quantity.symbol == ecoin_symbol) check(quantity >= MIN, "Minimum amount of ecoins is 50");
         uint64_t primary_key = table.available_primary_key();
         table.emplace(get_self(), [&](auto &row) {
           row.id = primary_key;
           row.sender = sender;
           row.receiver = get_self();
-          row.quantity = quantity - FEE;
+          row.quantity = quantity;
           row.is_sent = false;
           row.start_date = NULL;
           row.end_date = NULL;
@@ -177,6 +175,7 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
     }
 
   private:
+
     void send_recursion(const uint32_t& delay, const uint64_t& id) {
       action (
         permission_level(get_self(),"active"_n),
@@ -184,6 +183,17 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
         "defertxn"_n,
         std::make_tuple(delay, id)
       ).send();
+    }
+
+    bool isLimit(const name& sender) {
+      auto index = table.get_index<"bysender"_n>();
+      auto itr = index.lower_bound(sender.value);
+      int counter = 0;
+      while (itr != index.end() && itr->sender.value == sender.value) {
+        if(itr->quantity.symbol != ecoin_symbol) counter += 1;
+        itr++;
+      }
+      return counter >= LIMIT;
     }
 
     uint64_t updateId() {

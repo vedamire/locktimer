@@ -82,7 +82,7 @@ token_host.push_action(
         "quantity": "50.0000 EOS", "memo":""
     },
     zoro)
-FEE = 0.01
+FEE = 0.00
 
 def getBase(body):
     str_charl = str(body);
@@ -261,18 +261,18 @@ class TestStringMethods(unittest.TestCase):
         total = toStr(toFloat("50.000 EOS") - FEE * 5)
         self.assertEqual(balance, total)
     def test_ext_errors(self):
-        try:
-            token_host.push_action(
-                "transfer",
-                {
-                    "from": charlie, "to": locktimer4,
-                    "quantity": "0.0200 EOS", "memo":"createtimer"
-                },
-                charlie);
-            self.assertEqual("Transfering below MIN 0.0200 EOS", "");
-        except Error as err:
-            self.assertTrue("Minimum amount of deposit is 0.0500 EOS" in err.message)
-            print("min passed")
+        # try:
+        #     token_host.push_action(
+        #         "transfer",
+        #         {
+        #             "from": charlie, "to": locktimer4,
+        #             "quantity": "0.0200 EOS", "memo":"createtimer"
+        #         },
+        #         charlie);
+        #     self.assertEqual("Transfering below MIN 0.0200 EOS", "");
+        # except Error as err:
+        #     self.assertTrue("Minimum amount of deposit is 0.0500 EOS" in err.message)
+        #     print("min passed")
         try:
             token_host.push_action(
                 "transfer",
