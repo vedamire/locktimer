@@ -12,6 +12,8 @@ reset()
 create_master_account("master")
 
 create_account("token_host", master, account_name="eosio.token")
+# ecointoken12
+create_account("ecoin_host", master, account_name="ecointoken12")
 create_account("locktimer", master, account_name="locktimer")
 create_account("locktimer1", master, account_name="locktimer1")
 create_account("locktimer2", master, account_name="locktimer2")
@@ -21,6 +23,7 @@ create_account("locktimer5", master, account_name="locktimer5")
 create_account("locktime1r", master, account_name="locktime1r")
 
 token = Contract(token_host, "/home/ally/contracts/eosio.contracts/contracts/eosio.token")
+ecoin = Contract(ecoin_host, "/home/ally/contracts/eosio.contracts/contracts/eosio.token")
 lock = Contract(locktimer, CONTRACT_DIR)
 lock1 = Contract(locktimer1, CONTRACT_DIR)
 lock2 = Contract(locktimer2, CONTRACT_DIR)
@@ -42,6 +45,7 @@ create_account("charlie", master)
 create_account("bob", master)
 create_account("zoro", master, account_name="zoro")
 token.deploy()
+ecoin.deploy()
 lock.deploy()
 lock1.deploy()
 lock2.deploy()
@@ -58,7 +62,7 @@ token_host.push_action(
         "can_recall": "0",
         "can_whitelist": "0"
     }, [zoro, token_host])
-token_host.push_action(
+ecoin_host.push_action(
     "create",
         {
         "issuer": zoro,
@@ -66,7 +70,7 @@ token_host.push_action(
         "can_freeze": "0",
         "can_recall": "0",
         "can_whitelist": "0"
-    }, [zoro, token_host])
+    }, [zoro, ecoin_host])
 token_host.push_action(
     "issue",
     {
@@ -74,7 +78,7 @@ token_host.push_action(
     },
     permission=(zoro, Permission.ACTIVE))
 
-token_host.push_action(
+ecoin_host.push_action(
     "issue",
     {
         "to": zoro, "quantity": "100000.00 ECOIN", "memo": ""
@@ -168,7 +172,7 @@ class TestStringMethods(unittest.TestCase):
     def test_limit(self):
         # locktimer6
         for i in range(5):
-            token_host.push_action(
+            ecoin_host.push_action(
                 "transfer",
                 {
                     "from": zoro, "to": locktime1r,
@@ -192,7 +196,7 @@ class TestStringMethods(unittest.TestCase):
                 zoro);
             self.assertEqual("Creating timer out of bound", "");
         except Error as err:
-            self.assertTrue("You have expanded your 5 timers. Wait for release or lock Ecoin without limits" in err.message)
+            self.assertTrue("You have expanded your 5 timers. Lock Ecoin without limits" in err.message)
             print("timers bound passed")
 
 
@@ -462,6 +466,7 @@ class TestStringMethods(unittest.TestCase):
             print("lock ownership passed")
 
         try:
+            time.sleep(0.5)
             locktimer4.push_action (
                 "lock",
                 {

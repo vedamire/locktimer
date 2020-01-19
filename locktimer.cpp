@@ -16,6 +16,7 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
     const symbol ecoin_symbol;
     const asset MIN;
     const int LIMIT = 5;
+    const name ECOIN;
     struct counter {
      uint64_t deferid;
    };
@@ -29,6 +30,7 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
       name sender;
       name receiver;
       eosio::asset quantity;
+      name token;
       bool is_sent;
       uint32_t start_date;
       uint32_t end_date;
@@ -49,24 +51,25 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
 
   public:
     using contract::contract;
-    locktimer(name receiver, name code, datastream<const char *> ds) : contract(receiver, code, ds), ecoin_symbol("ECOIN", 2),
+    locktimer(name receiver, name code, datastream<const char *> ds) : contract(receiver, code, ds), ecoin_symbol("ECOIN", 2), ECOIN("ecointoken12"),
      MIN(50, this-> ecoin_symbol),
     table(_self, _self.value), counters(_self, _self.value) {}
-
-    [[eosio::on_notify("eosio.token::transfer")]]
+    [[eosio::on_notify("*::transfer")]]
+    // [[eosio::on_notify("eosio.token::transfer")]]
     void ontransfer(const name& sender, const name& to, const eosio::asset& quantity, const std::string& memo)
     {
       if (to != get_self() || sender == get_self()) return;
       check(quantity.amount > 0, "When pigs fly");
       if(memo == "createtimer") {
-        check(!isLimit(sender) || quantity.symbol == ecoin_symbol, "You have expanded your 5 timers. Wait for release or lock Ecoin without limits");
-        if(quantity.symbol == ecoin_symbol) check(quantity >= MIN, "Minimum amount of ecoins is 50");
+        if(get_first_receiver() != ECOIN || quantity.symbol != ecoin_symbol) check(!isLimit(sender, LIMIT), "You have expanded your 5 timers. Lock Ecoin without limits");
+        else check(quantity >= MIN, "Minimum amount of ecoins is 50");
         uint64_t primary_key = table.available_primary_key();
         table.emplace(get_self(), [&](auto &row) {
           row.id = primary_key;
           row.sender = sender;
           row.receiver = get_self();
           row.quantity = quantity;
+          row.token = get_first_receiver();
           row.is_sent = false;
           row.start_date = NULL;
           row.end_date = NULL;
@@ -185,15 +188,15 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
       ).send();
     }
 
-    bool isLimit(const name& sender) {
+    bool isLimit(const name& sender, const int& limit) {
       auto index = table.get_index<"bysender"_n>();
       auto itr = index.lower_bound(sender.value);
       int counter = 0;
       while (itr != index.end() && itr->sender.value == sender.value) {
-        if(itr->quantity.symbol != ecoin_symbol) counter += 1;
+        if(itr->quantity.symbol != ecoin_symbol || itr->token != ECOIN) counter += 1;
         itr++;
       }
-      return counter >= LIMIT;
+      return counter >= limit;
     }
 
     uint64_t updateId() {
@@ -211,7 +214,7 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
     void release(const timer_index::const_iterator& timer, timer_index& table) {
       action{
         permission_level{get_self(), "active"_n},
-        "eosio.token"_n,
+        timer->token,
         "transfer"_n,
         std::make_tuple(get_self(), timer->receiver, timer->quantity, std::string("Locked money are released!"))
       }.send();
