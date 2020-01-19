@@ -18,6 +18,7 @@ create_account("locktimer2", master, account_name="locktimer2")
 create_account("locktimer3", master, account_name="locktimer3")
 create_account("locktimer4", master, account_name="locktimer4")
 create_account("locktimer5", master, account_name="locktimer5")
+create_account("locktime1r", master, account_name="locktime1r")
 
 token = Contract(token_host, "/home/ally/contracts/eosio.contracts/contracts/eosio.token")
 lock = Contract(locktimer, CONTRACT_DIR)
@@ -26,6 +27,7 @@ lock2 = Contract(locktimer2, CONTRACT_DIR)
 lock3 = Contract(locktimer3, CONTRACT_DIR)
 lock4 = Contract(locktimer4, CONTRACT_DIR)
 lock5 = Contract(locktimer5, CONTRACT_DIR)
+lock6 = Contract(locktime1r, CONTRACT_DIR)
 
 locktimer.set_account_permission(Permission.ACTIVE, add_code=True)
 locktimer1.set_account_permission(Permission.ACTIVE, add_code=True)
@@ -33,6 +35,7 @@ locktimer2.set_account_permission(Permission.ACTIVE, add_code=True)
 locktimer3.set_account_permission(Permission.ACTIVE, add_code=True)
 locktimer4.set_account_permission(Permission.ACTIVE, add_code=True)
 locktimer5.set_account_permission(Permission.ACTIVE, add_code=True)
+locktime1r.set_account_permission(Permission.ACTIVE, add_code=True)
 
 token_host.set_account_permission(Permission.ACTIVE, add_code=True)
 create_account("charlie", master)
@@ -45,6 +48,7 @@ lock2.deploy()
 lock3.deploy()
 lock4.deploy()
 lock5.deploy()
+lock6.deploy()
 token_host.push_action(
     "create",
         {
@@ -54,11 +58,26 @@ token_host.push_action(
         "can_recall": "0",
         "can_whitelist": "0"
     }, [zoro, token_host])
-
+token_host.push_action(
+    "create",
+        {
+        "issuer": zoro,
+        "maximum_supply": "1000000000.00 ECOIN",
+        "can_freeze": "0",
+        "can_recall": "0",
+        "can_whitelist": "0"
+    }, [zoro, token_host])
 token_host.push_action(
     "issue",
     {
         "to": zoro, "quantity": "100000.0000 EOS", "memo": ""
+    },
+    permission=(zoro, Permission.ACTIVE))
+
+token_host.push_action(
+    "issue",
+    {
+        "to": zoro, "quantity": "100000.00 ECOIN", "memo": ""
     },
     permission=(zoro, Permission.ACTIVE))
 
@@ -82,8 +101,8 @@ token_host.push_action(
         "quantity": "50.0000 EOS", "memo":""
     },
     zoro)
-FEE = 0.00
-
+FEE = 0.00;
+LIMIT = 5;
 def getBase(body):
     str_charl = str(body);
     dots = str_charl[str_charl.find(".") + 1:];
@@ -145,6 +164,37 @@ class TestStringMethods(unittest.TestCase):
                 "quantity": "50.0000 EOS", "memo":""
             },
             zoro)
+
+    def test_limit(self):
+        # locktimer6
+        for i in range(5):
+            token_host.push_action(
+                "transfer",
+                {
+                    "from": zoro, "to": locktime1r,
+                    "quantity": str(i+1) + "00.00 ECOIN", "memo":"createtimer"
+                },
+                zoro);
+            token_host.push_action(
+                "transfer",
+                {
+                    "from": zoro, "to": locktime1r,
+                    "quantity": str(i+1) + ".0000 EOS", "memo":"createtimer"
+                },
+                zoro);
+        try:
+            token_host.push_action(
+                "transfer",
+                {
+                    "from": zoro, "to": locktime1r,
+                    "quantity": "0.9821 EOS" , "memo":"createtimer"
+                },
+                zoro);
+            self.assertEqual("Creating timer out of bound", "");
+        except Error as err:
+            self.assertTrue("You have expanded your 5 timers. Wait for release or lock Ecoin without limits" in err.message)
+            print("timers bound passed")
+
 
     def test_cancel(self):
         # time.sleep(1)
@@ -632,7 +682,6 @@ class TestStringMethods(unittest.TestCase):
 
             print("defertxn passed")
             # self.assertTrue("assertion failure with message" in format(err))
-
 
 if __name__ == '__main__':
     unittest.main()

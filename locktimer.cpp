@@ -49,7 +49,7 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
 
   public:
     using contract::contract;
-    locktimer(name receiver, name code, datastream<const char *> ds) : contract(receiver, code, ds), ecoin_symbol("ECOIN", 0),
+    locktimer(name receiver, name code, datastream<const char *> ds) : contract(receiver, code, ds), ecoin_symbol("ECOIN", 2),
      MIN(50, this-> ecoin_symbol),
     table(_self, _self.value), counters(_self, _self.value) {}
 
