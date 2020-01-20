@@ -16,12 +16,12 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
     const asset MIN;
     const int LIMIT = 5;
     const name ECOIN;
-    struct counter {
-     uint64_t deferid;
-   };
-
-   typedef eosio::singleton<"counter"_n, counter> counter_table;
-   counter_table counters;
+   //  struct counter {
+   //   uint64_t deferid;
+   // };
+   //
+   // // typedef eosio::singleton<"counter"_n, counter> counter_table;
+   // // counter_table counters;
 
     struct [[eosio::table]] timer
     {
@@ -52,7 +52,7 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
     using contract::contract;
     locktimer(name receiver, name code, datastream<const char *> ds) : contract(receiver, code, ds), ecoin_symbol("ECOIN", 2), ECOIN("ecointoken12"),
      MIN(5000, this-> ecoin_symbol),
-    table(_self, _self.value), counters(_self, _self.value) {}
+    table(_self, _self.value) {}
     [[eosio::on_notify("*::transfer")]]
     // [[eosio::on_notify("eosio.token::transfer")]]
     void ontransfer(const name& sender, const name& to, const eosio::asset& quantity, const std::string& memo)
@@ -99,7 +99,7 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
         row.end_date = date;
         row.is_sent = true;
       });
-      send_recursion(timer->end_date - now(), id);
+      // send_recursion(timer->end_date - now(), id);
     }
 
     [[eosio::action]]
@@ -124,33 +124,33 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
       release(timer, table, timer->receiver);
     }
 
-    [[eosio::action]]
-    void defertxn(const uint32_t& delay, const uint64_t& _id) {
-        require_auth(get_self());
-        eosio::transaction deferred;
-        uint32_t max_delay = 3888000; //max delay supported by EOS 3888000
-        if (delay <= max_delay) {
-          deferred.actions.emplace_back (
-            permission_level{get_self(), "active"_n},
-            get_self(), "autosend"_n,
-            std::make_tuple(_id)
-          );
-          deferred.delay_sec = delay;
-          deferred.send(updateId(), get_self());
-        //perform your transaction here
-        }
-        else{
-            uint32_t remaining_delay = delay - max_delay;
-            // transaction to update the delay
-            deferred.actions.emplace_back(
-                eosio::permission_level{get_self(), "active"_n},
-                get_self(),
-                "defertxn"_n,
-                std::make_tuple(remaining_delay, _id));
-            deferred.delay_sec = max_delay; // here we set the new delay which is maximum until remaining_delay is less the max_delay
-            deferred.send(updateId(), get_self());
-        }
-    }
+    // [[eosio::action]]
+    // void defertxn(const uint32_t& delay, const uint64_t& _id) {
+    //     require_auth(get_self());
+    //     eosio::transaction deferred;
+    //     uint32_t max_delay = 3888000; //max delay supported by EOS 3888000
+    //     if (delay <= max_delay) {
+    //       deferred.actions.emplace_back (
+    //         permission_level{get_self(), "active"_n},
+    //         get_self(), "autosend"_n,
+    //         std::make_tuple(_id)
+    //       );
+    //       deferred.delay_sec = delay;
+    //       deferred.send(updateId(), get_self());
+    //     //perform your transaction here
+    //     }
+    //     else{
+    //         uint32_t remaining_delay = delay - max_delay;
+    //         // transaction to update the delay
+    //         deferred.actions.emplace_back(
+    //             eosio::permission_level{get_self(), "active"_n},
+    //             get_self(),
+    //             "defertxn"_n,
+    //             std::make_tuple(remaining_delay, _id));
+    //         deferred.delay_sec = max_delay; // here we set the new delay which is maximum until remaining_delay is less the max_delay
+    //         deferred.send(updateId(), get_self());
+    //     }
+    // }
 
     [[eosio::action]]
     void claimmoney(const name& receiver, const uint64_t& id) {
@@ -172,14 +172,14 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
 
   private:
 
-    void send_recursion(const uint32_t& delay, const uint64_t& id) {
-      action (
-        permission_level(get_self(),"active"_n),
-        get_self(),
-        "defertxn"_n,
-        std::make_tuple(delay, id)
-      ).send();
-    }
+    // void send_recursion(const uint32_t& delay, const uint64_t& id) {
+    //   action (
+    //     permission_level(get_self(),"active"_n),
+    //     get_self(),
+    //     "defertxn"_n,
+    //     std::make_tuple(delay, id)
+    //   ).send();
+    // }
 
     bool isLimit(const name& sender, const int& limit) {
       auto index = table.get_index<"bysender"_n>();
@@ -192,17 +192,17 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
       return counter >= limit;
     }
 
-    uint64_t updateId() {
-      if(!counters.exists()) {
-        uint64_t initial = 1000;
-        counters.set(counter{initial}, get_self());
-        return initial;
-      }
-      counter count = counters.get();
-      counter newcounter = counter{count.deferid + (uint64_t) 1};
-      counters.set(newcounter, get_self());
-      return newcounter.deferid;
-    }
+    // uint64_t updateId() {
+    //   if(!counters.exists()) {
+    //     uint64_t initial = 1000;
+    //     counters.set(counter{initial}, get_self());
+    //     return initial;
+    //   }
+    //   counter count = counters.get();
+    //   counter newcounter = counter{count.deferid + (uint64_t) 1};
+    //   counters.set(newcounter, get_self());
+    //   return newcounter.deferid;
+    // }
 
     void release(const timer_index::const_iterator& timer, timer_index& table, const name& receiver) {
       action{
