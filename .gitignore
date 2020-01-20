@@ -1,6 +1,6 @@
 scripts/nodeos.log
-build//locktimer.wasm
-
+build/locktimer.wasm
+build/locktimer.abi
 locktimer.abi
 locktimer.wasm
 
