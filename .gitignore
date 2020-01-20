@@ -3,5 +3,6 @@ build/locktimer.wasm
 build/locktimer.abi
 locktimer.abi
 locktimer.wasm
-
+.wasm
+.abi
 tests/unittests.py

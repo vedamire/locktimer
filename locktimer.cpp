@@ -1,7 +1,6 @@
 // Maximum period of the deferred transaction is 45 days;
 
 #include <eosio/eosio.hpp>
-#include <eosio/print.hpp>
 #include <eosio/asset.hpp>
 #include <eosio/system.hpp>
 #include <eosio/transaction.hpp>
