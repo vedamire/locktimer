@@ -48,6 +48,7 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
     {
       if (to != get_self() || sender == get_self()) return;
       check(quantity.amount > 0, "When pigs fly");
+      check(quantity.is_valid(), "Quantity is invalid");
       if(memo == "createtimer") {
         if(get_first_receiver() != ECOIN || quantity.symbol != ecoin_symbol) check(!isLimit(sender, LIMIT), "You have expanded your 5 timers. Lock Ecoin without limits");
         else check(quantity >= MIN, "Minimum amount of ecoins is 50");
@@ -137,6 +138,7 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
     }
 
     void release(const timer_index::const_iterator& timer, timer_index& table, const name& receiver) {
+      check(timer->quantity.is_valid(), "Quantity is invalid");
       action{
         permission_level{get_self(), "active"_n},
         timer->token,
