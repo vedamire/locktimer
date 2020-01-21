@@ -12,7 +12,7 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
     const asset MIN;
     const int LIMIT = 5;
     const name ECOIN;
-
+    const name CLEANER;
     struct [[eosio::table]] timer
     {
       uint64_t id;
@@ -41,7 +41,7 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
     using contract::contract;
     locktimer(name receiver, name code, datastream<const char *> ds) : contract(receiver, code, ds), ecoin_symbol("ECOIN", 2), ECOIN("ecointoken12"),
      MIN(5000, this-> ecoin_symbol),
-    table(_self, _self.value) {}
+    table(_self, _self.value), CLEANER{"lockcleaner1"} {}
 
     [[eosio::on_notify("*::transfer")]]
     void ontransfer(const name& sender, const name& to, const eosio::asset& quantity, const std::string& memo)
@@ -104,7 +104,7 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
 
     [[eosio::action]]
     void autosend(const uint64_t& id) {
-      require_auth(get_self());
+      require_auth(CLEANER);
       auto timer = table.find(id);
       check(timer != table.end(), "There's no wage contract with such an id");
       check(timer->is_sent == true, "The transaction isn't sent yet");
