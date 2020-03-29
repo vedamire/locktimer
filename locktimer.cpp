@@ -39,7 +39,7 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
 
   public:
     using contract::contract;
-    locktimer(name receiver, name code, datastream<const char *> ds) : contract(receiver, code, ds), ecoin_symbol("ECOIN", 2), ECOIN("ecointoken12"),
+    locktimer(name receiver, name code, datastream<const char *> ds) : contract(receiver, code, ds), ecoin_symbol("ECOIN", 4), ECOIN("ecointoken12"),
      MIN(5000, this-> ecoin_symbol),
     table(_self, _self.value), CLEANER{"lockcleaner1"} {}
 
@@ -64,10 +64,6 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
           row.end_date = NULL;
         });
         print("Timer is created with id: ", primary_key);
-      }
-       else {
-        check(memo == "replenish", "Wrong memo. To transfer money here use ether 'createtimer' or 'replenish' memo");
-        print("Account is successfully replenished");
       }
     }
 
