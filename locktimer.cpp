@@ -49,7 +49,7 @@ class [[eosio::contract("locktimer")]] locktimer : public eosio::contract {
       if (to != get_self() || sender == get_self()) return;
       check(quantity.amount > 0, "When pigs fly");
       check(quantity.is_valid(), "Quantity is invalid");
-      check(get_first_receiver() == ECOIN || quantity.symbol == ecoin_symbol, "You can lock only Ecoins")
+      check(get_first_receiver() == ECOIN || quantity.symbol == ecoin_symbol, "You can lock only Ecoins");
       if(memo == "createtimer") {
         if(get_first_receiver() != ECOIN || quantity.symbol != ecoin_symbol) check(!isLimit(sender, LIMIT), "You have expanded your 5 timers. Lock Ecoin without limits");
         else check(quantity >= MIN, "Minimum amount of ecoins is 50");
